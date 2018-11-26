@@ -7,22 +7,26 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class BTReadWriteThread extends Thread {
-    private final BluetoothSocket mSocket;
+    private BluetoothSocket mSocket;
     private final String TAG = "BTReadWriteThread";
-    private final OutputStream mOutStream;
-    private final InputStream mInStream;
+    private OutputStream mOutStream;
+    private InputStream mInStream;
+    private DataInputStream mmInStream = null;
+    private DataOutputStream mmOutStream = null;
     private byte[] mBuffer;
     private Handler mHandler;
 
     public interface MessageConstants {
-        int MESSAGE_READ = 0;
-        int MESSAGE_WRITE = 1;
-        int MESSAGE_SNACKBAR = 2;
+        int MESSAGE_READ = 2;
+        int MESSAGE_WRITE = 3;
+        int MESSAGE_ERROR = 4;
     }
 
     public BTReadWriteThread(BluetoothSocket socket, Handler handler) {
@@ -47,6 +51,8 @@ public class BTReadWriteThread extends Thread {
 
         mInStream = tmpIn;
         mOutStream = tmpOut;
+        mmInStream = new DataInputStream(mInStream);
+        mmOutStream = new DataOutputStream(mOutStream);
     }
 
     public void run() {
@@ -55,9 +61,10 @@ public class BTReadWriteThread extends Thread {
 
         while (true) { // Keep listening until exception
             try {
-                numBytes = mInStream.read(mBuffer);
+                numBytes = mmInStream.read(mBuffer);
+                String newString = new String(mBuffer, 0, numBytes);
                 Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_READ, numBytes,
-                        -1, mBuffer);
+                        -1, newString);
                 readMsg.sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred while reading data. Input stream maybe disconnected.", e);
@@ -68,17 +75,14 @@ public class BTReadWriteThread extends Thread {
 
     public void write(byte[] bytes) {
         try {
-            mOutStream.write(bytes);
+            mmOutStream.write(bytes);
 
             Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1,
                     mBuffer);
             writtenMsg.sendToTarget();
         } catch (IOException e) {
             Log.e(TAG, "Error while sending data", e);
-            Message writeErrorMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_SNACKBAR);
-            Bundle bundle = new Bundle();
-            bundle.putString("snackbar","Couldn't send data to the other device");
-            writeErrorMsg.setData(bundle);
+            Message writeErrorMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
             mHandler.sendMessage(writeErrorMsg);
         }
     }

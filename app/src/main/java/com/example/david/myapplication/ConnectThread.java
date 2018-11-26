@@ -23,7 +23,6 @@ public class ConnectThread extends Thread {
     public interface MessageConstants {
         int MESSAGE_CONNECTED = 0;
         int MESSAGE_ERROR = 1;
-        int MESSAGE_SNACKBAR = 2;
     }
 
     public ConnectThread(BluetoothDevice device, String UUID, Handler handler) {
@@ -53,10 +52,8 @@ public class ConnectThread extends Thread {
             // until it succeeds or throws an exception.
             mmSocket.connect();
             Log.d(TAG, "Default socket connect() succeeded");
-            Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_SNACKBAR);
-            Bundle strData = new Bundle();
-            strData.putString("STR","Connected!");
-            msg.setData(strData);
+            Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_CONNECTED);
+            msg.obj = mmSocket;
             msg.sendToTarget();
         } catch (IOException connectException) {
             // Unable to connect; close the socket and return.
@@ -71,18 +68,13 @@ public class ConnectThread extends Thread {
                     mmFallbackSocket = (BluetoothSocket) m.invoke(mmSocket.getRemoteDevice(), params);
                     mmFallbackSocket.connect();
                     Log.d(TAG, "Fallback socket connect() succeeded");
-                    Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_SNACKBAR);
-                    Bundle strData = new Bundle();
-                    strData.putString("STR","(Fallback) Connected!");
-                    msg.setData(strData);
+                    Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_CONNECTED);
+                    msg.obj = mmFallbackSocket;
                     msg.sendToTarget();
                 } catch (Exception e) {
                     Log.e(TAG, "Fallback socket connect() failed", e);
                     mmFallbackSocket.close();
-                    Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_SNACKBAR);
-                    Bundle strData = new Bundle();
-                    strData.putString("STR", "Could not connect");
-                    msg.setData(strData);
+                    Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
                     msg.sendToTarget();
                 }
                 mmSocket.close();

@@ -31,9 +31,13 @@ public class DisplayMessageActivity extends AppCompatActivity {
     private String selectedBTDaddress = null;
     private BluetoothDeviceViewAdapter adapter;
     private Handler mHandler;
+    private BluetoothSocket mSocket = null;
+    public BTReadWriteThread btReadWriteThread;
+    private StringBuffer mReadBuffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mReadBuffer = new StringBuffer(1024);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
 
@@ -43,10 +47,26 @@ public class DisplayMessageActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case ConnectThread.MessageConstants.MESSAGE_SNACKBAR:
-                        Bundle msgData = msg.getData();
-                        String snackbarString = msgData.getString("STR");
-                        Snackbar.make(findViewById(R.id.display_message_layout), snackbarString, Snackbar.LENGTH_SHORT).show();
+                    case ConnectThread.MessageConstants.MESSAGE_CONNECTED:
+                        mSocket = (BluetoothSocket) msg.obj;
+                        Snackbar.make(findViewById(R.id.display_message_layout), "Connected!", Snackbar.LENGTH_SHORT).show();
+                        btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
+                        btReadWriteThread.start();
+                        break;
+                    case ConnectThread.MessageConstants.MESSAGE_ERROR:
+                        Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();
+                        break;
+                    case BTReadWriteThread.MessageConstants.MESSAGE_READ:
+                        mReadBuffer.append((String)msg.obj);
+                        if(mReadBuffer.toString().endsWith("\r\n")) {
+                            Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
+                            mReadBuffer.delete(0, mReadBuffer.length());
+                        }
+                        break;
+                    case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
+                        break;
+                    case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
+                        break;
                 }
             }
         };
