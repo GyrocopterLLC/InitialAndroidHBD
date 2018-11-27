@@ -5,4 +5,6 @@
     <string name="button_bt_connect">Connect</string>
     <string name="text_list_of_bt_devices">Available Bluetooth Devices</string>
     <string name="bt_spp_uuid">00001101-0000-1000-8000-00805F9B34FB</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_settings">Settings</string>
 </resources>

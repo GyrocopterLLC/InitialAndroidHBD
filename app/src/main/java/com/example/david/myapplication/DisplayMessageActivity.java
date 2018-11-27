@@ -13,6 +13,7 @@ import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -40,6 +41,11 @@ public class DisplayMessageActivity extends AppCompatActivity {
         mReadBuffer = new StringBuffer(1024);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
+
+        // Set default toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.disp_message_toolbar);
+        setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         HandlerThread handlerThread = new HandlerThread("DisplayMessageHandlerThread");
         handlerThread.start();

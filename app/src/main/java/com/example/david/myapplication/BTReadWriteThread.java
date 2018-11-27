@@ -77,8 +77,7 @@ public class BTReadWriteThread extends Thread {
         try {
             mmOutStream.write(bytes);
 
-            Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE, -1, -1,
-                    mBuffer);
+            Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE);
             writtenMsg.sendToTarget();
         } catch (IOException e) {
             Log.e(TAG, "Error while sending data", e);
