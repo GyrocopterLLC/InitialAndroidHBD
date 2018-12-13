@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SpeedometerView">
+        <attr name="max_speed" format="float"></attr>
+        <attr name="current_speed" format="float"></attr>
+        <attr name="on_color" format="color"></attr>
+        <attr name="off_color" format="color"></attr>
+        <attr name="scale_color" format="color"></attr>
+        <attr name="text_shadow_color" format="color"></attr>
+        <attr name="scale_text_size" format="dimension"></attr>
+        <attr name="reading_text_size" format="dimension"></attr>
+        <attr name="scale_spacing" format="integer"></attr>
+    </declare-styleable>
+
+</resources>
