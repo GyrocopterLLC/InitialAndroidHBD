@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,8 +20,11 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String MAIN_TAG = "DEBUG_LOG_MAIN_TAG";
     public static final String BA_LIST = "com.example.david.myapplication.BA_LIST";
     public static final String BA_MESSAGE = "com.example.david.myapplication.BA_MESSAGE";
+    public static final String SAVESTATE_KEY = "SAVESTATE_KEY";
+    public static final String SAVESPEED_KEY = "SAVESPEED_KEY";
     public static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
@@ -40,10 +44,8 @@ public class MainActivity extends AppCompatActivity {
         // Setup speedometer
         mSpeedoView = (SpeedometerView) findViewById(R.id.speedometer);
         mCurrentSpeed = 10;
-        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+
         if(((GlobalSettings)getApplication()).isConnected()){
-
-
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
         } else {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
@@ -51,21 +53,40 @@ public class MainActivity extends AppCompatActivity {
 
         // Check if BT adapter is disabled, and enable it.
         BA = BluetoothAdapter.getDefaultAdapter();
-        if(BA.isEnabled()) {
-            // Yay it's enabled! For now, let's Toast.
-            Snackbar.make(findViewById(R.id.main_view), "Bluetooth is already enabled!",Snackbar.LENGTH_SHORT).setAction("No action",null).show();
-//            Toast toast = Toast.makeText(this,"Bluetooth is already enabled!", Toast.LENGTH_SHORT);
-//            toast.show();
+        Boolean alreadyStarted = false;
+        try {
+            alreadyStarted = savedInstanceState.getBoolean(SAVESTATE_KEY);
+            mCurrentSpeed = savedInstanceState.getFloat(SAVESPEED_KEY);
+        } catch (Exception e)
+        {
+            Log.d(MAIN_TAG, "Could not read from bundle.");
         }
-        else {
-            Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(turnOn, REQUEST_ENABLE_BT);
-                }
-            }).show();
+        if(!alreadyStarted) {
+            if(BA.isEnabled()) {
+                // Yay it's enabled! For now, let's Toast.
+                Snackbar.make(findViewById(R.id.main_view), "Bluetooth is already enabled!",Snackbar.LENGTH_SHORT).setAction("No action",null).show();
+    //            Toast toast = Toast.makeText(this,"Bluetooth is already enabled!", Toast.LENGTH_SHORT);
+    //            toast.show();
+            }
+            else {
+                Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(turnOn, REQUEST_ENABLE_BT);
+                    }
+                }).show();
+            }
         }
+
+        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(SAVESTATE_KEY, true);
+        outState.putFloat(SAVESPEED_KEY, mCurrentSpeed);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
