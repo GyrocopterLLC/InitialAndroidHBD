@@ -69,31 +69,42 @@ public class SpeedometerView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int chosenHeight;
+        int chosenWidth;
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        int chosenWidth = chooseDimension(widthMode, widthSize);
-        int chosenHeight = chooseDimension(heightMode, heightSize);
-
-        int chosenDimension = Math.min(chosenWidth, chosenHeight);
-        centerX = chosenDimension / 2;
-        centerY = chosenDimension / 2;
-        setMeasuredDimension(chosenDimension, chosenDimension);
-
-
-    }
-
-    private int chooseDimension(int mode, int size) {
-        if (mode == MeasureSpec.AT_MOST || mode == MeasureSpec.EXACTLY) {
-            return size;
-        } else { // (mode == MeasureSpec.UNSPECIFIED)
-            return preferredSize;
+        if(widthMode == MeasureSpec.UNSPECIFIED) {
+            chosenWidth = preferredSize;
+        } else {
+            // Either for MeasureSpec.EXACTLY or MeasureSpec.AT_MOST
+            // Width takes precedence over height
+            chosenWidth = widthSize;
         }
+
+        if(heightMode == MeasureSpec.UNSPECIFIED) {
+            chosenHeight = preferredSize;
+        } else {
+            if(heightMode == MeasureSpec.EXACTLY) {
+                chosenHeight = heightSize;
+            } else {
+                // MeasureSpec.AT_MOST
+                // Choose a height appropriate for the given width
+                // Since the View is mostly a semicircle, it should be about
+                // twice as wide as tall. Aiming for a 16:9 ratio
+                chosenHeight = chosenWidth * 9 / 16;
+            }
+        }
+        // Choose center of speedometer circle. This is where the current speed is printed, too
+        centerX = chosenWidth / 2;
+        // Near the bottom of the View. About 95% down.
+        centerY = chosenHeight * 95 / 100;
+        setMeasuredDimension(chosenWidth, chosenHeight);
     }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -156,10 +167,12 @@ public class SpeedometerView extends View {
     protected void onSizeChanged(int width, int height, int oldw, int oldh) {
 
         // Setting up the oval area in which the arc will be drawn
+        // Oval will take up ~80% of the View's area
         if (width > height){
-            radius = height/4;
+            radius = width*4/10;
         }else{
-            radius = width/4;
+            // Gotta squish it in
+            radius = height/4;
         }
         oval.set(centerX - radius,
                 centerY - radius,

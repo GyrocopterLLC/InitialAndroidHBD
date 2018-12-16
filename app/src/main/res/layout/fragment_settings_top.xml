@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".settingsFragments.SettingsTop">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_settings_top_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data" />
+
+        <Button
+            android:id="@+id/btn_settings_top_foc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FOC" />
+
+        <Button
+            android:id="@+id/btn_settings_top_motor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Motor" />
+
+        <Button
+            android:id="@+id/btn_settings_top_util"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Utilities" />
+
+        <Button
+            android:id="@+id/btn_settings_top_cntrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Controller" />
+
+        <Button
+            android:id="@+id/btn_settings_top_throttle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Throttle" />
+
+    </LinearLayout>
+
+</FrameLayout>

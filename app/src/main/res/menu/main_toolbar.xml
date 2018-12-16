@@ -8,6 +8,13 @@
         android:icon="@drawable/ic_connect_drawing"
         android:title="@string/action_connect"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="Settings"
+        app:showAsAction="ifRoom" />
     <!--<item-->
         <!--android:id="@+id/action_settings"-->
         <!--android:title="@string/action_settings"-->

@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
 
+    SpeedometerView mSpeedoView;
+    float mCurrentSpeed;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -33,6 +37,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
+        // Setup speedometer
+        mSpeedoView = (SpeedometerView) findViewById(R.id.speedometer);
+        mCurrentSpeed = 10;
+        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+        if(((GlobalSettings)getApplication()).isConnected()){
+
+
+            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
+        } else {
+            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
+        }
 
         // Check if BT adapter is disabled, and enable it.
         BA = BluetoothAdapter.getDefaultAdapter();
@@ -67,24 +82,29 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, DisplayMessageActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.action_settings:
+                Intent intent2 = new Intent(this, SettingsActivity.class);
+                startActivity(intent2);
+                break;
         }
         return true;
     }
 
-    /** called when button is pressed **/
-    public void SendMessage(View view)
+    /** called when speed increase button is pressed **/
+    public void onSpeedIncrease(View view)
     {
-        // Do a thing when button is pressed.
-        //pairedDevices = BA.getBondedDevices();
-        //ArrayList<String> list_of_devices = new ArrayList<String>();
-        //for(BluetoothDevice btd : pairedDevices)
-        //{
-        //    list_of_devices.add(btd.getName());
-        //}
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        //Bundle extras = new Bundle();
-        //extras.putStringArrayList(BA_LIST, list_of_devices);
-        //intent.putExtra(BA_MESSAGE, extras);
-        startActivity(intent);
+        if(mCurrentSpeed < 30){
+            mCurrentSpeed = mCurrentSpeed + 1.0f;
+            mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+        }
+    }
+
+    /** called when speed decrease button is pressed **/
+    public void onSpeedDecrease(View view)
+    {
+        if(mCurrentSpeed > 0){
+            mCurrentSpeed = mCurrentSpeed - 1.0f;
+            mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+        }
     }
 }
