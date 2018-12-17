@@ -72,9 +72,13 @@ public class DisplayMessageActivity extends AppCompatActivity {
                                 adapter.notifyDataSetChanged();
                             }
                         }
+                        findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
+                        findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
                         break;
                     case ConnectThread.MessageConstants.MESSAGE_ERROR:
                         Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();
+                        findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
+                        findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
                         break;
                     case BTReadWriteThread.MessageConstants.MESSAGE_READ:
                         mReadBuffer.append((String)msg.obj);
@@ -157,6 +161,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
             ConnectThread connectThread = new ConnectThread(mDevice,getResources().getString(R.string.bt_spp_uuid), mHandler);
             connectThread.start();
+            findViewById(R.id.textConnectingLabel).setVisibility(View.VISIBLE);
+            findViewById(R.id.connectingProgressBar).setVisibility(View.VISIBLE);
         }
 
     }

@@ -10,4 +10,5 @@
     <string name="throttle_label">Throttle</string>
     <string name="phase_current">Phase Current</string>
     <string name="battery_current">Battery Current</string>
+    <string name="connecting">Connecting...</string>
 </resources>
