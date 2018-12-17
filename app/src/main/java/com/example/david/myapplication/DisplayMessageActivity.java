@@ -58,6 +58,9 @@ public class DisplayMessageActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(R.id.display_message_layout), "Connected!", Snackbar.LENGTH_SHORT).show();
                         btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
                         btReadWriteThread.start();
+                        ((GlobalSettings)getApplication()).setConnected(true);
+                        ((GlobalSettings)getApplication()).setDevice(mSocket.getRemoteDevice());
+                        ((GlobalSettings)getApplication()).setSocket(mSocket);
                         break;
                     case ConnectThread.MessageConstants.MESSAGE_ERROR:
                         Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();
@@ -89,7 +92,23 @@ public class DisplayMessageActivity extends AppCompatActivity {
         Set<BluetoothDevice> btdevices =  BA.getBondedDevices();
         ArrayList<BluetoothDeviceViewModel> btviewmodels = new ArrayList<BluetoothDeviceViewModel>();
         for(BluetoothDevice btd : btdevices) {
-            btviewmodels.add(new BluetoothDeviceViewModel(btd.getName(), btd.getAddress()));
+
+            /* This junk is needed because there isn't just a simple
+             * BluetoothDevice.isConnected() in the API.
+             */
+            if(((GlobalSettings)getApplication()).isConnected()){
+                if(((GlobalSettings)getApplication()).getDevice().getName().equals(btd.getName())) {
+                    btviewmodels.add(new BluetoothDeviceViewModel(btd.getName(),btd.getAddress(),
+                            true));
+                } else {
+                    btviewmodels.add(new BluetoothDeviceViewModel(btd.getName(), btd.getAddress(),
+                            false));
+                }
+            } else {
+                btviewmodels.add(new BluetoothDeviceViewModel(btd.getName(), btd.getAddress(),
+                        false));
+            }
+
         }
 
         adapter = new BluetoothDeviceViewAdapter(btviewmodels, this);

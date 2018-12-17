@@ -111,21 +111,15 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    /** called when speed increase button is pressed **/
-    public void onSpeedIncrease(View view)
-    {
-        if(mCurrentSpeed < 30){
-            mCurrentSpeed = mCurrentSpeed + 1.0f;
-            mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(((GlobalSettings)getApplication()).isConnected()){
+            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
+        } else {
+            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
         }
     }
 
-    /** called when speed decrease button is pressed **/
-    public void onSpeedDecrease(View view)
-    {
-        if(mCurrentSpeed > 0){
-            mCurrentSpeed = mCurrentSpeed - 1.0f;
-            mSpeedoView.setCurrentSpeed(mCurrentSpeed);
-        }
-    }
+
 }

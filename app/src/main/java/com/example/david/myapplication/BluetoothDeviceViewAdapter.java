@@ -73,7 +73,12 @@ public class BluetoothDeviceViewAdapter extends ArrayAdapter<BluetoothDeviceView
 
         vh.txtName.setText(dataModel.name);
         vh.txtMac.setText(dataModel.mac);
-        vh.imgIcon.setImageResource(R.drawable.ic_bluetooth_black_24dp);
+        if(dataModel.connected){
+            vh.imgIcon.setImageResource(R.drawable.ic_bluetooth_connected_black_24dp);
+        }
+        else {
+            vh.imgIcon.setImageResource(R.drawable.ic_bluetooth_black_24dp);
+        }
 
         return convertView;
     }
