@@ -58,9 +58,20 @@ public class DisplayMessageActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(R.id.display_message_layout), "Connected!", Snackbar.LENGTH_SHORT).show();
                         btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
                         btReadWriteThread.start();
+                        // Update application
                         ((GlobalSettings)getApplication()).setConnected(true);
                         ((GlobalSettings)getApplication()).setDevice(mSocket.getRemoteDevice());
                         ((GlobalSettings)getApplication()).setSocket(mSocket);
+                        // Update view list
+                        ListView lv = findViewById(R.id.listView);
+                        BluetoothDeviceViewAdapter adapter = (BluetoothDeviceViewAdapter)lv.getAdapter();
+                        for(int i = 0; i < lv.getAdapter().getCount(); i++) {
+                            BluetoothDeviceViewModel item = adapter.getItem(i);
+                            if(item.getName().equals(mSocket.getRemoteDevice().getName())) {
+                                item.setConnected(true);
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
                         break;
                     case ConnectThread.MessageConstants.MESSAGE_ERROR:
                         Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();

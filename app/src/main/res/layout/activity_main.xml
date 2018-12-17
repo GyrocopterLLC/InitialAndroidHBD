@@ -90,20 +90,47 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="32dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:gravity="end"
         android:text="@string/phase_current"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_throttle_label" />
+        app:layout_constraintTop_toBottomOf="@+id/phaseCurrentBar" />
 
     <ProgressBar
         android:id="@+id/phaseCurrentBar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-        android:layout_width="200dp"
-        android:layout_height="32dp"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_throttle_label" />
+
+    <TextView
+        android:id="@+id/text_current_battery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:text="@string/battery_current"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_current_phase" />
+        app:layout_constraintTop_toBottomOf="@+id/batteryCurrentBar" />
+
+    <ProgressBar
+        android:id="@+id/batteryCurrentBar"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_throttle_label" />
 
 </android.support.constraint.ConstraintLayout>
