@@ -137,14 +137,28 @@ public class SpeedometerView extends View {
         Path circle = new Path();
         double halfCircumference = radius * Math.PI;
         double increments = SCALE_SPACING;
+        circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
         for(int i = 0; i < this.mMaxSpeed; i += increments){
-            circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
+
             canvas.drawTextOnPath(String.format("%d", i),
                     circle,
                     (float) (i*halfCircumference/this.mMaxSpeed),
                     -30f,
                     scalePaint);
         }
+        // Add final entry for maximum value
+        //circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
+        String message = String.format("%d",(int)this.mMaxSpeed);
+        float[] widths = new float[message.length()];
+        scalePaint.getTextWidths(message,widths);
+        float advance = 0;
+        for(double wid:widths) advance += wid;
+        canvas.drawTextOnPath(  String.format("%d",(int)this.mMaxSpeed),
+                                circle,
+                                ((float) (halfCircumference))- advance,
+                                -30f,
+                                scalePaint);
+
 
         canvas.restore();
     }
@@ -168,12 +182,9 @@ public class SpeedometerView extends View {
 
         // Setting up the oval area in which the arc will be drawn
         // Oval will take up ~80% of the View's area
-        if (width > height){
-            radius = width*4/10;
-        }else{
-            // Gotta squish it in
-            radius = height/4;
-        }
+        radius = width/2 - 30.0f - SCALE_SIZE;  // Subtract the width of the scale text and
+                                                // its offset
+
         oval.set(centerX - radius,
                 centerY - radius,
                 centerX + radius,

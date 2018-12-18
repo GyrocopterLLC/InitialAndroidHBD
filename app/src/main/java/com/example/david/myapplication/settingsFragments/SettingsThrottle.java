@@ -1,7 +1,6 @@
 package com.example.david.myapplication.settingsFragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,24 +9,29 @@ import android.view.ViewGroup;
 
 import com.example.david.myapplication.R;
 
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link SettingsFOC#newInstance} factory method to
+ * Use the {@link SettingsThrottle#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsFOC extends Fragment {
+public class SettingsThrottle extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public SettingsFOC() {
+    public SettingsThrottle() {
         // Required empty public constructor
     }
 
-    public static SettingsFOC newInstance() {
-        SettingsFOC fragment = new SettingsFOC();
+    /**
+     * Default newInstance - just returns the empty constructor version of the class.
+     * @return A new instance of fragment SettingsData
+     */
+    public static SettingsThrottle newInstance() {
+        SettingsThrottle fragment = new SettingsThrottle();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -46,9 +50,8 @@ public class SettingsFOC extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings_foc, container, false);
-
-
+        View v = inflater.inflate(R.layout.fragment_settings_throttle, container, false);
+        return v;
     }
 
     @Override

@@ -1,12 +1,9 @@
 package com.example.david.myapplication;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -16,17 +13,12 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
-public class DisplayMessageActivity extends AppCompatActivity {
+public class BTConnectActivity extends AppCompatActivity {
 
     private BluetoothAdapter BA;
     private String selectedBTDaddress = null;
@@ -35,29 +27,33 @@ public class DisplayMessageActivity extends AppCompatActivity {
     private BluetoothSocket mSocket = null;
     public BTReadWriteThread btReadWriteThread;
     private StringBuffer mReadBuffer;
+    private HandlerThread mHandlerThread;
+    private ConnectThread mConnectThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mReadBuffer = new StringBuffer(1024);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_message);
+        setContentView(R.layout.activity_bluetooth_connect);
 
         // Set default toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.disp_message_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setTitle(R.string.btconnect_title);
 
-        HandlerThread handlerThread = new HandlerThread("DisplayMessageHandlerThread");
-        handlerThread.start();
-        mHandler = new Handler(handlerThread.getLooper()) {
+        mHandlerThread = new HandlerThread("DisplayMessageHandlerThread");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case ConnectThread.MessageConstants.MESSAGE_CONNECTED:
                         mSocket = (BluetoothSocket) msg.obj;
                         Snackbar.make(findViewById(R.id.display_message_layout), "Connected!", Snackbar.LENGTH_SHORT).show();
-                        btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
-                        btReadWriteThread.start();
+//                        btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
+//                        btReadWriteThread.start();
                         // Update application
                         ((GlobalSettings)getApplication()).setConnected(true);
                         ((GlobalSettings)getApplication()).setDevice(mSocket.getRemoteDevice());
@@ -80,17 +76,17 @@ public class DisplayMessageActivity extends AppCompatActivity {
                         findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
                         findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
                         break;
-                    case BTReadWriteThread.MessageConstants.MESSAGE_READ:
-                        mReadBuffer.append((String)msg.obj);
-                        if(mReadBuffer.toString().endsWith("\r\n")) {
-                            Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
-                            mReadBuffer.delete(0, mReadBuffer.length());
-                        }
-                        break;
-                    case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
-                        break;
-                    case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
-                        break;
+//                    case BTReadWriteThread.MessageConstants.MESSAGE_READ:
+//                        mReadBuffer.append((String)msg.obj);
+//                        if(mReadBuffer.toString().endsWith("\r\n")) {
+//                            Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
+//                            mReadBuffer.delete(0, mReadBuffer.length());
+//                        }
+//                        break;
+//                    case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
+//                        break;
+//                    case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
+//                        break;
                 }
             }
         };
@@ -152,6 +148,14 @@ public class DisplayMessageActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        // We can safely close the handler thread and its looper now
+        mHandlerThread.quitSafely();
+
+        super.onPause();
+    }
+
     // Called when connect button is pressed
     public void ConnectToBTD(View view) {
         if(selectedBTDaddress != null) {
@@ -159,8 +163,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
 //            AcceptThread acceptThread = new AcceptThread();
 //            acceptThread.start();
 
-            ConnectThread connectThread = new ConnectThread(mDevice,getResources().getString(R.string.bt_spp_uuid), mHandler);
-            connectThread.start();
+            mConnectThread = new ConnectThread(mDevice,getResources().getString(R.string.bt_spp_uuid), mHandler);
+            mConnectThread.start();
             findViewById(R.id.textConnectingLabel).setVisibility(View.VISIBLE);
             findViewById(R.id.connectingProgressBar).setVisibility(View.VISIBLE);
         }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">DMEBIKE Dashboard</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Find Bluetooth Devices</string>
     <string name="button_bt_connect">Connect</string>
@@ -11,4 +11,27 @@
     <string name="phase_current">Phase Current</string>
     <string name="battery_current">Battery Current</string>
     <string name="connecting">Connecting...</string>
+    <string name="var_name">Variable Name</string>
+    <string name="eeprom_val">EEPROM Value</string>
+    <string name="ram_val">RAM Value</string>
+    <string name="kp">Kp</string>
+    <string name="dt">DT</string>
+    <string name="kc">Kc</string>
+    <string name="kd">Kd</string>
+    <string name="ki">Ki</string>
+    <string name="ram_commit">Save to RAM</string>
+    <string name="eeprom_commit">Save to EEPROM</string>
+    <string name="choose_vars">Choose Vars</string>
+    <string name="numvars">Number of Vars</string>
+    <string name="speed">Data Speed</string>
+    <string name="settings_title">Settings</string>
+    <string name="btconnect_title">Bluetooth Connections</string>
+    <string-array name="data_speed_vals">
+        <item>50 Hz</item>
+        <item>100 Hz</item>
+        <item>200 Hz</item>
+        <item>500 Hz</item>
+        <item>1 kHz</item>
+        <item>5 kHz</item>
+    </string-array>
 </resources>

@@ -2,7 +2,11 @@ package com.example.david.myapplication;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,11 +16,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +30,11 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
+    private BluetoothSocket mSocket = null;
+    public BTReadWriteThread btReadWriteThread;
+    private StringBuffer mReadBuffer;
 
     SpeedometerView mSpeedoView;
     float mCurrentSpeed;
@@ -100,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_connect:
-                Intent intent = new Intent(this, DisplayMessageActivity.class);
+                Intent intent = new Intent(this, BTConnectActivity.class);
                 startActivity(intent);
                 break;
             case R.id.action_settings:
@@ -116,6 +123,31 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(((GlobalSettings)getApplication()).isConnected()){
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
+            mSocket = ((GlobalSettings)getApplication()).getSocket();
+            // Create new handler for messaging the BT device
+            mHandlerThread = new HandlerThread("MainActivityHandlerThread");
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case BTReadWriteThread.MessageConstants.MESSAGE_READ:
+                            mReadBuffer.append((String)msg.obj);
+                            if(mReadBuffer.toString().endsWith("\r\n")) {
+                                Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
+                                mReadBuffer.delete(0, mReadBuffer.length());
+                            }
+                            break;
+                        case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
+                            break;
+                        case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
+                            break;
+                    }
+                }
+            };
+            // Start the BT read-write thread
+            btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
+            btReadWriteThread.start();
         } else {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
         }
