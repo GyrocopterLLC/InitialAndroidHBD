@@ -29,6 +29,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:max_speed="30"
+        app:units="mph"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="18sp"
@@ -38,11 +39,7 @@
     <View
         android:id="@+id/divider"
         android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_height="4dp"
         android:background="?android:attr/listDivider"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,20 +65,20 @@
         android:id="@+id/text_throttle_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="32dp"
-        android:gravity="end"
+        android:layout_marginEnd="8dp"
+        android:gravity="fill_horizontal"
         android:text="@string/throttle_label"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/throttleBar"
         app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info" />
 
     <ProgressBar
         android:id="@+id/throttleBar"
         style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
         android:layout_width="200dp"
-        android:layout_height="32dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/text_throttle_label" />
 
@@ -109,7 +106,8 @@
         android:layout_marginRight="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_throttle_label"
-        app:max_speed="30"
+        app:max_speed="25"
+        app:units="A"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="12sp"
@@ -151,12 +149,24 @@
         android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_throttle_label"
-        app:max_speed="30"
+        app:max_speed="25"
+        app:units="A"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="12sp"
         app:reading_text_size="16sp"
         app:text_shadow_color="@android:color/holo_blue_bright" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="onClick"
+        android:text="Button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_current_phase" />
     <!--<ProgressBar-->
         <!--android:id="@+id/batteryCurrentBar"-->
         <!--style="@android:style/Widget.DeviceDefault.Light.ProgressBar"-->

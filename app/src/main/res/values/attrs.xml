@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="SpeedometerView">
         <attr name="max_speed" format="float"></attr>
+        <attr name="units" format="string"></attr>
         <attr name="current_speed" format="float"></attr>
         <attr name="on_color" format="color"></attr>
         <attr name="off_color" format="color"></attr>

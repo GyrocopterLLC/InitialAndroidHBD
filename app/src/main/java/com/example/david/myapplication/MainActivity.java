@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.Set;
@@ -35,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothSocket mSocket = null;
     public BTReadWriteThread btReadWriteThread;
     private StringBuffer mReadBuffer;
+    private CountDownTimer mTimer;
+    private boolean mSpeedDir = false;
 
     SpeedometerView mSpeedoView;
     float mCurrentSpeed;
@@ -122,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if(((GlobalSettings)getApplication()).isConnected()){
-            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
+            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to: "+((GlobalSettings)getApplication()).getDevice().getName());
             mSocket = ((GlobalSettings)getApplication()).getSocket();
             // Create new handler for messaging the BT device
             mHandlerThread = new HandlerThread("MainActivityHandlerThread");
@@ -152,6 +156,38 @@ public class MainActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
         }
     }
+
+    public void onClick(View v) {
+        mTimer = new CountDownTimer(5000, 50) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if(mSpeedDir) {
+                    if (mCurrentSpeed < 30.0f) {
+                        mCurrentSpeed += 1.0f;
+                    } else {
+                        mSpeedDir = false;
+                    }
+                } else {
+                    if(mCurrentSpeed > 0.0f) {
+                        mCurrentSpeed -= 1.0f;
+                    } else {
+                        mSpeedDir = true;
+                    }
+                }
+                mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                ProgressBar pb = (ProgressBar) findViewById(R.id.throttleBar);
+                pb.setProgress((int)(mCurrentSpeed/30.0f*pb.getMax()));
+            }
+
+            @Override
+            public void onFinish() {
+                mCurrentSpeed = 10.0f;
+                mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+            }
+        };
+        mTimer.start();
+    }
+
 
 
 }

@@ -37,6 +37,7 @@ public class SpeedometerView extends View {
     private int SCALE_SPACING = 20;
     private float SCALE_SIZE = 14f;
     private float READING_SIZE = 60f;
+    private String UNITS;
 
     // Scale configuration
     private float centerX;
@@ -61,6 +62,7 @@ public class SpeedometerView extends View {
             READING_SIZE = a.getDimension(R.styleable.SpeedometerView_reading_text_size, READING_SIZE);
             SCALE_SPACING = a.getInt(R.styleable.SpeedometerView_scale_spacing, SCALE_SPACING);
             TEXT_SHADOW_COLOR = a.getColor(R.styleable.SpeedometerView_text_shadow_color, TEXT_SHADOW_COLOR);
+            UNITS = a.getString(R.styleable.SpeedometerView_units);
         } finally{
             a.recycle();
         }
@@ -165,7 +167,9 @@ public class SpeedometerView extends View {
 
     private void drawReading(Canvas canvas){
         Path path = new Path();
-        String message = String.format("%d mph", (int)this.mCurrentSpeed);
+        String message;
+        if(UNITS == null) message = String.format("%d", (int)this.mCurrentSpeed);
+        else message = String.format("%d %s",(int)this.mCurrentSpeed, UNITS);
         float[] widths = new float[message.length()];
         readingPaint.getTextWidths(message, widths);
         float advance = 0;
