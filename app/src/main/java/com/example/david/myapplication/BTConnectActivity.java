@@ -59,17 +59,23 @@ public class BTConnectActivity extends AppCompatActivity {
                         ((GlobalSettings)getApplication()).setDevice(mSocket.getRemoteDevice());
                         ((GlobalSettings)getApplication()).setSocket(mSocket);
                         // Update view list
-                        ListView lv = findViewById(R.id.listView);
-                        BluetoothDeviceViewAdapter adapter = (BluetoothDeviceViewAdapter)lv.getAdapter();
-                        for(int i = 0; i < lv.getAdapter().getCount(); i++) {
-                            BluetoothDeviceViewModel item = adapter.getItem(i);
-                            if(item.getName().equals(mSocket.getRemoteDevice().getName())) {
-                                item.setConnected(true);
-                                adapter.notifyDataSetChanged();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ListView lv = findViewById(R.id.listView);
+                                BluetoothDeviceViewAdapter adapter = (BluetoothDeviceViewAdapter)lv.getAdapter();
+                                for(int i = 0; i < lv.getAdapter().getCount(); i++) {
+                                    BluetoothDeviceViewModel item = adapter.getItem(i);
+                                    if(item.getName().equals(mSocket.getRemoteDevice().getName())) {
+                                        item.setConnected(true);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                }
+                                findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
+                                findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
                             }
-                        }
-                        findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
-                        findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
+                        });
+
                         break;
                     case ConnectThread.MessageConstants.MESSAGE_ERROR:
                         Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();
@@ -152,6 +158,10 @@ public class BTConnectActivity extends AppCompatActivity {
     protected void onPause() {
         // We can safely close the handler thread and its looper now
         mHandlerThread.quitSafely();
+        HandlerThread thisGuyGonnaStopNow = mHandlerThread;
+        mHandlerThread = null;
+        thisGuyGonnaStopNow.interrupt();
+
 
         super.onPause();
     }

@@ -59,7 +59,7 @@ public class ConnectThread extends Thread {
             // Unable to connect; close the socket and return.
             try {
                 Log.e(TAG, "Default socket connect() failed", connectException);
-                // Try the fallback method
+ /*               // Try the fallback method
                 try {
                     Class<?> clazz = mmSocket.getRemoteDevice().getClass();
                     Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
@@ -76,7 +76,7 @@ public class ConnectThread extends Thread {
                     mmFallbackSocket.close();
                     Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
                     msg.sendToTarget();
-                }
+                }*/
                 mmSocket.close();
             } catch (IOException closeException) {
                 Log.e(TAG, "Could not close the client socket", closeException);

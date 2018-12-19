@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(((GlobalSettings)getApplication()).isConnected()){
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to: "+((GlobalSettings)getApplication()).getDevice().getName());
+            mReadBuffer = new StringBuffer(1024);
             mSocket = ((GlobalSettings)getApplication()).getSocket();
             // Create new handler for messaging the BT device
             mHandlerThread = new HandlerThread("MainActivityHandlerThread");
@@ -137,8 +138,19 @@ public class MainActivity extends AppCompatActivity {
                     switch (msg.what) {
                         case BTReadWriteThread.MessageConstants.MESSAGE_READ:
                             mReadBuffer.append((String)msg.obj);
-                            if(mReadBuffer.toString().endsWith("\r\n")) {
-                                Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
+                            String allTheInput = mReadBuffer.toString();
+                            if(allTheInput.endsWith("\r\n")) {
+                                if(allTheInput.startsWith("S:")) {
+                                    // Speed data coming in
+
+                                    try {
+                                        mCurrentSpeed = Float.parseFloat(allTheInput.substring(2, allTheInput.indexOf("\r\n")));
+                                        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                                    } catch (NumberFormatException e){
+                                        Log.d(MAIN_TAG, "Could not parse speed string");
+                                    }
+                                }
+                                Snackbar.make(findViewById(R.id.main_view), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
                                 mReadBuffer.delete(0, mReadBuffer.length());
                             }
                             break;
