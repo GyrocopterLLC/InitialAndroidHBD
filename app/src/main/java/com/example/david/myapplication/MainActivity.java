@@ -40,8 +40,12 @@ public class MainActivity extends AppCompatActivity {
     private CountDownTimer mTimer;
     private boolean mSpeedDir = false;
 
-    SpeedometerView mSpeedoView;
+    SpeedometerView mSpeedoView, mPhaseView, mBatteryView;
+    ProgressBar mThrottleView;
     float mCurrentSpeed;
+    float mCurrentThrottle;
+    float mCurrentPhaseAmps;
+    float mCurrentBatteryAmps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         // Setup speedometer
         mSpeedoView = (SpeedometerView) findViewById(R.id.speedometer);
-        mCurrentSpeed = 10;
+        mThrottleView = (ProgressBar) findViewById(R.id.throttleBar);
+        mPhaseView = (SpeedometerView) findViewById(R.id.phaseCurrentBar);
+        mBatteryView = (SpeedometerView) findViewById(R.id.batteryCurrentBar);
+        mCurrentSpeed = 0;
+        mCurrentThrottle = 0;
+        mCurrentBatteryAmps = 0;
+        mCurrentPhaseAmps = 0;
 
         if(((GlobalSettings)getApplication()).isConnected()){
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
@@ -67,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
         Boolean alreadyStarted = false;
         try {
             alreadyStarted = savedInstanceState.getBoolean(SAVESTATE_KEY);
-            mCurrentSpeed = savedInstanceState.getFloat(SAVESPEED_KEY);
         } catch (Exception e)
         {
             Log.d(MAIN_TAG, "Could not read from bundle.");
@@ -89,8 +98,6 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
             }
         }
-
-        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
     }
 
     @Override
@@ -142,14 +149,22 @@ public class MainActivity extends AppCompatActivity {
                             if(allTheInput.endsWith("\r\n")) {
                                 if(allTheInput.startsWith("S:")) {
                                     // Speed data coming in
-
-                                    try {
-                                        mCurrentSpeed = Float.parseFloat(allTheInput.substring(2, allTheInput.indexOf("\r\n")));
-                                        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
-                                    } catch (NumberFormatException e){
-                                        Log.d(MAIN_TAG, "Could not parse speed string");
-                                    }
+                                    mCurrentSpeed = getFloat(allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentSpeed);
+                                    mSpeedoView.setCurrentSpeed(mCurrentSpeed);
                                 }
+                                if(allTheInput.startsWith("T:")) {
+                                    mCurrentThrottle = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentThrottle);
+                                    mThrottleView.setProgress((int)mCurrentThrottle);
+                                }
+                                if(allTheInput.startsWith("P:")) {
+                                    mCurrentPhaseAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentPhaseAmps);
+                                    mPhaseView.setCurrentSpeed(mCurrentPhaseAmps);
+                                }
+                                if(allTheInput.startsWith("B:")) {
+                                    mCurrentBatteryAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentBatteryAmps);
+                                    mBatteryView.setCurrentSpeed(mCurrentBatteryAmps);
+                                }
+
                                 Snackbar.make(findViewById(R.id.main_view), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
                                 mReadBuffer.delete(0, mReadBuffer.length());
                             }
@@ -200,6 +215,16 @@ public class MainActivity extends AppCompatActivity {
         mTimer.start();
     }
 
+    public float getFloat(String toFloat, float deflt) {
+        float out;
+        try {
+            out = Float.parseFloat(toFloat);
+        } catch (NumberFormatException e) {
+            out = deflt;
+            Log.d(MAIN_TAG, "Could not parse float: "+toFloat);
+        }
+        return out;
+    }
 
 
 }
