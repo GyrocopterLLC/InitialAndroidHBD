@@ -13,4 +13,10 @@
         <attr name="scale_spacing" format="integer"></attr>
     </declare-styleable>
 
+    <declare-styleable name="ThrottleView">
+        <attr name="min_color" format="color"/>
+        <attr name="max_color" format="color"/>
+        <attr name="gradient_start" format="integer"/>
+    </declare-styleable>
+
 </resources>

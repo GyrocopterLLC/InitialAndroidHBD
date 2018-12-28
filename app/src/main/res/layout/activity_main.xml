@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/main_view"
+    android:background="@color/app_background"
     tools:context=".MainActivity">
 
     <android.support.v7.widget.Toolbar
@@ -19,22 +20,20 @@
 
     <com.example.david.myapplication.SpeedometerView
         android:id="@+id/speedometer"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/throttleBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:max_speed="30"
-        app:units="mph"
+        app:reading_text_size="24sp"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="18sp"
-        app:reading_text_size="24sp"
-        app:text_shadow_color="@android:color/holo_blue_bright" />
+        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:units="mph" />
 
     <View
         android:id="@+id/divider"
@@ -61,26 +60,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider" />
 
-    <TextView
-        android:id="@+id/text_throttle_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:gravity="fill_horizontal"
-        android:text="@string/throttle_label"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/throttleBar"
-        app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info" />
-
-    <ProgressBar
+    <com.example.david.myapplication.ThrottleView
         android:id="@+id/throttleBar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-        android:layout_width="200dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="30dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_throttle_label" />
+        app:layout_constraintTop_toTopOf="@+id/speedometer"
+        app:max_color="@android:color/holo_red_light"
+        app:gradient_start="80"/>
 
     <TextView
         android:id="@+id/text_current_phase"
@@ -98,21 +89,21 @@
 
     <com.example.david.myapplication.SpeedometerView
         android:id="@+id/phaseCurrentBar"
-        android:layout_width="180dp"
+        android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/batteryCurrentBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_throttle_label"
+        app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info"
         app:max_speed="25"
-        app:units="A"
+        app:reading_text_size="16sp"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="12sp"
-        app:reading_text_size="16sp"
-        app:text_shadow_color="@android:color/holo_blue_bright" />
+        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:units="A" />
 
     <!--<ProgressBar-->
         <!--android:id="@+id/phaseCurrentBar"-->
@@ -144,18 +135,18 @@
         android:layout_width="180dp"
         android:layout_height="100dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_throttle_label"
+        app:layout_constraintStart_toEndOf="@+id/phaseCurrentBar"
+        app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info"
         app:max_speed="25"
-        app:units="A"
+        app:reading_text_size="16sp"
         app:scale_color="@android:color/black"
         app:scale_spacing="5"
         app:scale_text_size="12sp"
-        app:reading_text_size="16sp"
-        app:text_shadow_color="@android:color/holo_blue_bright" />
+        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:units="A" />
 
     <Button
         android:id="@+id/button"

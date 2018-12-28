@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mSpeedDir = false;
 
     SpeedometerView mSpeedoView, mPhaseView, mBatteryView;
-    ProgressBar mThrottleView;
+    ThrottleView mThrottleView;
     float mCurrentSpeed;
     float mCurrentThrottle;
     float mCurrentPhaseAmps;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         // Setup speedometer
         mSpeedoView = (SpeedometerView) findViewById(R.id.speedometer);
-        mThrottleView = (ProgressBar) findViewById(R.id.throttleBar);
+        mThrottleView = (ThrottleView) findViewById(R.id.throttleBar);
         mPhaseView = (SpeedometerView) findViewById(R.id.phaseCurrentBar);
         mBatteryView = (SpeedometerView) findViewById(R.id.batteryCurrentBar);
         mCurrentSpeed = 0;
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 if(allTheInput.startsWith("T:")) {
                                     mCurrentThrottle = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentThrottle);
-                                    mThrottleView.setProgress((int)mCurrentThrottle);
+                                    mThrottleView.setThrottlePosition((int)mCurrentThrottle);
                                 }
                                 if(allTheInput.startsWith("P:")) {
                                     mCurrentPhaseAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentPhaseAmps);
@@ -202,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 mSpeedoView.setCurrentSpeed(mCurrentSpeed);
-                ProgressBar pb = (ProgressBar) findViewById(R.id.throttleBar);
-                pb.setProgress((int)(mCurrentSpeed/30.0f*pb.getMax()));
+                ThrottleView pb = (ThrottleView) findViewById(R.id.throttleBar);
+                pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
             }
 
             @Override
