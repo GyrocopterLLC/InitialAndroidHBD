@@ -208,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                mCurrentSpeed = 10.0f;
-                mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                //mCurrentSpeed = 10.0f;
+                //mSpeedoView.setCurrentSpeed(mCurrentSpeed);
             }
         };
         mTimer.start();

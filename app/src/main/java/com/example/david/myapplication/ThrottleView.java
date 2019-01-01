@@ -69,10 +69,10 @@ public class ThrottleView extends View {
         canvas.drawRect(mThrottleBar,mBarPaint);
 //        drawThrottleMarker();
         mMarkerPath.reset();
-        mMarkerPath.moveTo(DEFAULT_MARGIN,mHeight*mThrottlePosition/100);
-        mMarkerPath.lineTo(0, mHeight*mThrottlePosition/100-DEFAULT_MARGIN/2);
-        mMarkerPath.lineTo(0,mHeight*mThrottlePosition/100+DEFAULT_MARGIN/2);
-        mMarkerPath.lineTo(DEFAULT_MARGIN, mHeight*mThrottlePosition/100);
+        mMarkerPath.moveTo(DEFAULT_MARGIN,mHeight*(100-mThrottlePosition)/100);
+        mMarkerPath.lineTo(0, mHeight*(100-mThrottlePosition)/100-DEFAULT_MARGIN/2);
+        mMarkerPath.lineTo(0,mHeight*(100-mThrottlePosition)/100+DEFAULT_MARGIN/2);
+        mMarkerPath.lineTo(DEFAULT_MARGIN, mHeight*(100-mThrottlePosition)/100);
         canvas.drawPath(mMarkerPath,mMarkerPaint);
     }
 
