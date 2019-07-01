@@ -221,6 +221,10 @@ public class MainActivity extends AppCompatActivity {
                     dispString.append(String.format("0x%X,",(int)myBuf.charAt(i)));
                 }
                 Snackbar.make(findViewById(R.id.main_view), dispString, Snackbar.LENGTH_SHORT).show();
+                if(((GlobalSettings)getApplication()).isConnected()){
+                    btReadWriteThread.write(myBuf);
+
+                }
                 //mCurrentSpeed = 10.0f;
                 //mSpeedoView.setCurrentSpeed(mCurrentSpeed);
             }

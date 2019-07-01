@@ -68,7 +68,7 @@ public class BTReadWriteThread extends Thread {
                 numBytes = mmInStream.read(mBuffer);
                 StringBuffer newStringB = new StringBuffer(numBytes);
                 for(int i = 0; i < numBytes; i++) {
-                    newStringB.append((char)(mBuffer[i])&0xFF);
+                    newStringB.append((char)(mBuffer[i]));
                 }
 //                StringBuffer newStringB = new StringBuffer(new String(mBuffer, StandardCharsets.UTF_8));
 //                StringBuffer newString = new StringBuffer(mBuffer, 0, numBytes);
