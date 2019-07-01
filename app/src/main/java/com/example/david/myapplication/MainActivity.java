@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 public void handleMessage(Message msg) {
                     switch (msg.what) {
                         case BTReadWriteThread.MessageConstants.MESSAGE_READ:
-                            mReadBuffer.append((String)msg.obj);
+                            mReadBuffer.append(msg.obj);
                             String allTheInput = mReadBuffer.toString();
                             if(allTheInput.endsWith("\r\n")) {
                                 if(allTheInput.startsWith("S:")) {

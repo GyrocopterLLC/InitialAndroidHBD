@@ -1,40 +1,42 @@
 package com.example.david.myapplication;
 
-import android.support.v4.content.res.TypedArrayUtils;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.zip.CRC32;
 
 public class PacketTools {
-    byte SOP1 = (byte)0x9A;
-    byte SOP2 = (byte)0xCC;
+    private final byte SOP1 = (byte)0x9A;
+    private final byte SOP2 = (byte)0xCC;
 
-    public Byte[] create_crc32_packed(Byte[] protectMe) {
-        CRC32 crc_generator = new CRC32();
+    private CRC32 crc_generator = null;
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public StringBuffer create_crc32_packed(StringBuffer protectMe) {
+
+        StringBuffer retStringB = new StringBuffer(4);
+
+        if(crc_generator == null) {
+            crc_generator = new CRC32();
+        }
         crc_generator.reset();
-        Byte[] crc32 = new Byte[4];
 
-        if(protectMe.length % 4 != 0) {
-            int addZeros = 4 - (protectMe.length % 4);
-            Byte[] protectMeMore = new Byte[protectMe.length + addZeros];
-            System.arraycopy(protectMe,0,protectMeMore,0,protectMe.length);
-            for(int i = 0; i < addZeros; i++) {
-                protectMeMore[protectMe.length + i] = (byte)0;
-            }
-            for(int i = 0; i < protectMeMore.length; i++) {
-                crc_generator.update(protectMeMore[i].byteValue());
-            }
-        } else {
-            for(int i = 0; i < protectMe.length; i++) {
-                crc_generator.update(protectMe[i].byteValue());
+        if(protectMe.length() % 4 != 0) {
+            int addZeros = 4 - (protectMe.length() % 4);
+            for (int i = 0; i < addZeros; i++) {
+                protectMe.append((char) 0);
             }
         }
+        crc_generator.update(protectMe.toString().getBytes(StandardCharsets.UTF_8));
+
         long crc32_l = crc_generator.getValue();
-        crc32[0] = (byte)((crc32_l & 0xFF000000L)>>24);
-        crc32[1] = (byte)((crc32_l & 0x00FF0000L)>>16);
-        crc32[2] = (byte)((crc32_l & 0x0000FF00L)>>8);
-        crc32[3] = (byte)((crc32_l & 0x000000FFL)>>0);
-        return crc32;
+        retStringB.append( (char)((crc32_l & 0xFF000000L)>>24));
+        retStringB.append( (char)((crc32_l & 0x00FF0000L)>>16));
+        retStringB.append( (char)((crc32_l & 0x0000FF00L)>>8));
+        retStringB.append( (char)((crc32_l & 0x000000FFL)>>0));
+        return retStringB;
     }
 
     /**
@@ -48,38 +50,31 @@ public class PacketTools {
      *   6->6+n: data
      * 7+n-10+n: CRC32 on bytes 0->6+n
      */
-    public byte[] Pack(byte packetID, byte[] data) {
-        ArrayList<Byte> tempArray = new ArrayList<Byte>();
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public StringBuffer Pack(byte packetID, byte[] data) {
+        StringBuffer retStringB = new StringBuffer(data.length+10);
 
         // add SOP bytes
-        tempArray.add(SOP1);
-        tempArray.add(SOP2);
+        retStringB.append((char)SOP1);
+        retStringB.append((char)SOP2);
         // add packet id
         byte nPacketID = (byte)((~packetID)&0xFF);
-        tempArray.add(packetID);
-        tempArray.add(nPacketID);
+        retStringB.append((char)packetID);
+        retStringB.append((char)nPacketID);
         byte len1 = (byte)((data.length & 0xFF00) >> 8);
         byte len2 = (byte)(data.length & 0x00FF);
         // add data length
-        tempArray.add(len1);
-        tempArray.add(len2);
+        retStringB.append((char)len1);
+        retStringB.append((char)len2);
         // add data
+
         for(int i = 0; i < data.length; i++) {
-            tempArray.add(data[i]);
+            retStringB.append((char)data[i]);
         }
         // add crc32
-        Byte[] crc32 = create_crc32_packed((Byte[])tempArray.toArray());
-        for(int i = 0; i < 4; i++) {
-            tempArray.add(crc32[i]);
-        }
+        retStringB.append(create_crc32_packed(retStringB));
 
-        // convert to primitive byte array
-        byte[] output = new byte[tempArray.size()];
-        for(int i = 0; i < tempArray.size(); i++) {
-            output[i] = tempArray.get(i).byteValue();
-        }
-
-        return output;
+        return retStringB;
     }
 
 }

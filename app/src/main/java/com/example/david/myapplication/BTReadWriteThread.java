@@ -1,10 +1,12 @@
 package com.example.david.myapplication;
 
 import android.bluetooth.BluetoothSocket;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -12,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class BTReadWriteThread extends Thread {
     private BluetoothSocket mSocket;
@@ -55,6 +58,7 @@ public class BTReadWriteThread extends Thread {
         mmOutStream = new DataOutputStream(mOutStream);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void run() {
         mBuffer = new byte[1024];
         int numBytes; // Number of bytes read
@@ -62,9 +66,10 @@ public class BTReadWriteThread extends Thread {
         while (true) { // Keep listening until exception
             try {
                 numBytes = mmInStream.read(mBuffer);
-                String newString = new String(mBuffer, 0, numBytes);
+                StringBuffer newStringB = new StringBuffer(new String(mBuffer, StandardCharsets.UTF_8));
+//                StringBuffer newString = new StringBuffer(mBuffer, 0, numBytes);
                 Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_READ, numBytes,
-                        -1, newString);
+                        -1, newStringB);
                 readMsg.sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred while reading data. Input stream maybe disconnected.", e);
@@ -73,8 +78,10 @@ public class BTReadWriteThread extends Thread {
         }
     }
 
-    public void write(byte[] bytes) {
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void write(StringBuffer stringB) {
         try {
+            byte[] bytes = stringB.toString().getBytes(StandardCharsets.UTF_8);
             mmOutStream.write(bytes);
 
             Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE);
