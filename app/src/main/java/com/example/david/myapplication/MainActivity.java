@@ -4,10 +4,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -206,8 +208,19 @@ public class MainActivity extends AppCompatActivity {
                 pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onFinish() {
+                char[] pktdata = {0x27, 0x01};
+                PacketTools packetTools = new PacketTools();
+                StringBuffer myBuf = packetTools.Pack((char) 0x01, pktdata);
+                StringBuffer dispString = new StringBuffer("pkt length: ");
+                dispString.append(myBuf.length());
+                dispString.append(" ");
+                for(int i = 0; i< myBuf.length(); i++) {
+                    dispString.append(String.format("0x%X,",(int)myBuf.charAt(i)));
+                }
+                Snackbar.make(findViewById(R.id.main_view), dispString, Snackbar.LENGTH_SHORT).show();
                 //mCurrentSpeed = 10.0f;
                 //mSpeedoView.setCurrentSpeed(mCurrentSpeed);
             }

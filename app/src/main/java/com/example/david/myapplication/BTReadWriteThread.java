@@ -66,7 +66,11 @@ public class BTReadWriteThread extends Thread {
         while (true) { // Keep listening until exception
             try {
                 numBytes = mmInStream.read(mBuffer);
-                StringBuffer newStringB = new StringBuffer(new String(mBuffer, StandardCharsets.UTF_8));
+                StringBuffer newStringB = new StringBuffer(numBytes);
+                for(int i = 0; i < numBytes; i++) {
+                    newStringB.append((char)(mBuffer[i])&0xFF);
+                }
+//                StringBuffer newStringB = new StringBuffer(new String(mBuffer, StandardCharsets.UTF_8));
 //                StringBuffer newString = new StringBuffer(mBuffer, 0, numBytes);
                 Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_READ, numBytes,
                         -1, newStringB);
@@ -81,7 +85,11 @@ public class BTReadWriteThread extends Thread {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void write(StringBuffer stringB) {
         try {
-            byte[] bytes = stringB.toString().getBytes(StandardCharsets.UTF_8);
+            byte[] bytes = new byte[stringB.length()];
+            for(int i = 0; i < stringB.length(); i++) {
+                bytes[i] = (byte)(stringB.charAt(i) & 0xFF);
+            }
+//            byte[] bytes = stringB.toString().getBytes(StandardCharsets.UTF_8);
             mmOutStream.write(bytes);
 
             Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE);
