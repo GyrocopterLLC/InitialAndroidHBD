@@ -1,12 +1,8 @@
 package com.example.david.myapplication;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -14,9 +10,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
-public class BTReadWriteThread extends Thread {
+public class BTReadWriteThread implements Runnable{
     private BluetoothSocket mSocket;
     private final String TAG = "BTReadWriteThread";
     private OutputStream mOutStream;
@@ -25,6 +20,9 @@ public class BTReadWriteThread extends Thread {
     private DataOutputStream mmOutStream = null;
     private byte[] mBuffer;
     private Handler mHandler;
+
+    // Hold on to the Thread context for safe keeping
+    private Thread mCurrentThread;
 
     public interface MessageConstants {
         int MESSAGE_READ = 2;
@@ -58,10 +56,11 @@ public class BTReadWriteThread extends Thread {
         mmOutStream = new DataOutputStream(mOutStream);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void run() {
         mBuffer = new byte[1024];
         int numBytes; // Number of bytes read
+
+        mCurrentThread = Thread.currentThread();
 
         while (true) { // Keep listening until exception
             try {
@@ -82,7 +81,6 @@ public class BTReadWriteThread extends Thread {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void write(StringBuffer stringB) {
         try {
             byte[] bytes = new byte[stringB.length()];
@@ -98,14 +96,6 @@ public class BTReadWriteThread extends Thread {
             Log.e(TAG, "Error while sending data", e);
             Message writeErrorMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
             mHandler.sendMessage(writeErrorMsg);
-        }
-    }
-
-    public void cancel() {
-        try{
-            mSocket.close();
-        } catch (IOException e) {
-            Log.e(TAG, "Couldn't close the connection",e);
         }
     }
 }

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,9 +44,7 @@ public class BTConnectActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle(R.string.btconnect_title);
 
-        mHandlerThread = new HandlerThread("DisplayMessageHandlerThread");
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper()) {
+        mHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
@@ -98,7 +97,7 @@ public class BTConnectActivity extends AppCompatActivity {
         };
 
         // Get the Intent that started this activity and extract the string
-        Intent intent = getIntent();
+//        Intent intent = getIntent();
 //        Bundle message = intent.getBundleExtra(MainActivity.BA_MESSAGE);
 //        ArrayList<String> mystrings = message.getStringArrayList(MainActivity.BA_LIST);
 //        String[] mystringarray = new String[mystrings.size()];
@@ -157,10 +156,10 @@ public class BTConnectActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         // We can safely close the handler thread and its looper now
-        mHandlerThread.quitSafely();
-        HandlerThread thisGuyGonnaStopNow = mHandlerThread;
-        mHandlerThread = null;
-        thisGuyGonnaStopNow.interrupt();
+//        mHandlerThread.quitSafely();
+//        HandlerThread thisGuyGonnaStopNow = mHandlerThread;
+//        mHandlerThread = null;
+//        thisGuyGonnaStopNow.interrupt();
 
 
         super.onPause();
@@ -174,7 +173,7 @@ public class BTConnectActivity extends AppCompatActivity {
 //            acceptThread.start();
 
             mConnectThread = new ConnectThread(mDevice,getResources().getString(R.string.bt_spp_uuid), mHandler);
-            mConnectThread.start();
+            new Thread(mConnectThread).start();
             findViewById(R.id.textConnectingLabel).setVisibility(View.VISIBLE);
             findViewById(R.id.connectingProgressBar).setVisibility(View.VISIBLE);
         }

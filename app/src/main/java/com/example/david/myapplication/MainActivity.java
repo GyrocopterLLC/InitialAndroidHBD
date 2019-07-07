@@ -4,12 +4,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,10 +18,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -139,9 +137,7 @@ public class MainActivity extends AppCompatActivity {
             mReadBuffer = new StringBuffer(1024);
             mSocket = ((GlobalSettings)getApplication()).getSocket();
             // Create new handler for messaging the BT device
-            mHandlerThread = new HandlerThread("MainActivityHandlerThread");
-            mHandlerThread.start();
-            mHandler = new Handler(mHandlerThread.getLooper()) {
+            mHandler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(Message msg) {
                     switch (msg.what) {
@@ -180,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             };
             // Start the BT read-write thread
             btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
-            btReadWriteThread.start();
+            new Thread(btReadWriteThread).start();
         } else {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
         }
@@ -208,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
                 pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onFinish() {
                 char[] pktdata = {0x27, 0x01};
@@ -230,6 +225,19 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mTimer.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(((GlobalSettings)getApplication()).isConnected()){
+            try {
+                ((GlobalSettings) getApplication()).getSocket().close();
+                ((GlobalSettings)getApplication()).setConnected(false);
+            } catch (IOException e) {
+                Log.e(MAIN_TAG, "Could not close the client socket", e);
+            }
+        }
+        super.onDestroy();
     }
 
     public float getFloat(String toFloat, float deflt) {

@@ -3,15 +3,13 @@ package com.example.david.myapplication;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 
-public class ConnectThread extends Thread {
+public class ConnectThread implements Runnable {
 
     private final String TAG = "ConnectThread";
     private final BluetoothSocket mmSocket;
@@ -19,6 +17,16 @@ public class ConnectThread extends Thread {
     private final BluetoothDevice mmDevice;
     private final BluetoothAdapter mBluetoothAdapter;
     private final Handler mHandler;
+
+    public enum ConnectedState {
+        UNCONNECTED_STATE,
+        CONNECTED_STATE
+    };
+
+    private ConnectedState mConnectedState;
+
+    // Hold on to the Thread context for safe keeping
+    private Thread mCurrentThread;
 
     public interface MessageConstants {
         int MESSAGE_CONNECTED = 0;
@@ -33,6 +41,8 @@ public class ConnectThread extends Thread {
         BluetoothSocket tmp = null;
         mmDevice = device;
 
+        mConnectedState = ConnectedState.UNCONNECTED_STATE;
+
         try {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.
             // MY_UUID is the app's UUID string, also used in the server code.
@@ -44,6 +54,8 @@ public class ConnectThread extends Thread {
     }
 
     public void run() {
+        mCurrentThread = Thread.currentThread();
+
         // Cancel discovery because it otherwise slows down the connection.
         mBluetoothAdapter.cancelDiscovery();
 
@@ -52,6 +64,7 @@ public class ConnectThread extends Thread {
             // until it succeeds or throws an exception.
             mmSocket.connect();
             Log.d(TAG, "Default socket connect() succeeded");
+            mConnectedState = ConnectedState.CONNECTED_STATE;
             Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_CONNECTED);
             msg.obj = mmSocket;
             msg.sendToTarget();
@@ -78,6 +91,9 @@ public class ConnectThread extends Thread {
                     msg.sendToTarget();
                 }*/
                 mmSocket.close();
+                Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
+                msg.obj = mmSocket;
+                msg.sendToTarget();
             } catch (IOException closeException) {
                 Log.e(TAG, "Could not close the client socket", closeException);
             }
@@ -89,8 +105,15 @@ public class ConnectThread extends Thread {
         //manageMyConnectedSocket(mmSocket);
     }
 
+    public boolean isConnected() {
+        if(mConnectedState == ConnectedState.CONNECTED_STATE) {
+            return true;
+        }
+        return false;
+    }
+
     // Closes the client socket and causes the thread to finish.
-    public void cancel() {
+    public void close() {
         try {
             mmSocket.close();
         } catch (IOException e) {

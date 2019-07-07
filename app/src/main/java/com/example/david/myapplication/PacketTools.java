@@ -1,21 +1,32 @@
 package com.example.david.myapplication;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.zip.CRC32;
 
 public class PacketTools {
     private final char SOP1 = 0x9A;
     private final char SOP2 = 0xCC;
 
-
-
     private CRC32 crc_generator = null;
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public byte[] floatToBytes(float in_float) {
+        int int_bits = Float.floatToIntBits(in_float);
+        return new byte[] {
+                (byte)((int_bits & 0xFF000000L) >> 24),
+                (byte)((int_bits & 0x00FF0000L) >> 16),
+                (byte)((int_bits & 0x0000FF00L) >> 8),
+                (byte)(int_bits & 0x000000FFL)
+        };
+    }
+
+    public float bytesToFloat(byte[] in_bytes) {
+        int int_bits = ((int)(in_bytes[0]) << 24) +
+                ((int)(in_bytes[1]) << 16) +
+                ((int)(in_bytes[2]) << 8) +
+                ((int)(in_bytes[3]));
+
+        return Float.intBitsToFloat(int_bits);
+    }
+
     public StringBuffer create_crc32_packed(StringBuffer protectMe) {
 
         StringBuffer retStringB = new StringBuffer(4);
@@ -59,7 +70,6 @@ public class PacketTools {
      *   6->6+n: data
      * 7+n-10+n: CRC32 on bytes 0->6+n
      */
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public StringBuffer Pack(char packetID, char[] data) {
         StringBuffer retStringB = new StringBuffer(data.length+10);
 
