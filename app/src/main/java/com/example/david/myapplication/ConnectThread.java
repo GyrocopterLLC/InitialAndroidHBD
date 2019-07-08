@@ -19,7 +19,7 @@ public class ConnectThread implements Runnable {
     private final Handler mHandler;
 
     public enum ConnectedState {
-        UNCONNECTED_STATE,
+        DISCONNECTED_STATE,
         CONNECTED_STATE
     };
 
@@ -41,7 +41,7 @@ public class ConnectThread implements Runnable {
         BluetoothSocket tmp = null;
         mmDevice = device;
 
-        mConnectedState = ConnectedState.UNCONNECTED_STATE;
+        mConnectedState = ConnectedState.DISCONNECTED_STATE;
 
         try {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.
@@ -92,6 +92,7 @@ public class ConnectThread implements Runnable {
                 }*/
                 mmSocket.close();
                 Message msg = mHandler.obtainMessage(MessageConstants.MESSAGE_ERROR);
+                mConnectedState = ConnectedState.DISCONNECTED_STATE;
                 msg.obj = mmSocket;
                 msg.sendToTarget();
             } catch (IOException closeException) {
@@ -112,12 +113,18 @@ public class ConnectThread implements Runnable {
         return false;
     }
 
-    // Closes the client socket and causes the thread to finish.
+    // Closes the client socket
     public void close() {
+        mConnectedState = ConnectedState.DISCONNECTED_STATE;
         try {
             mmSocket.close();
         } catch (IOException e) {
             Log.e(TAG, "Could not close the client socket", e);
         }
+    }
+
+    // Stops the thread
+    public void stop() {
+        mCurrentThread.interrupt();
     }
 }

@@ -3,9 +3,7 @@ package com.example.david.myapplication;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
@@ -26,14 +24,10 @@ public class BTConnectActivity extends AppCompatActivity {
     private BluetoothDeviceViewAdapter adapter;
     private Handler mHandler;
     private BluetoothSocket mSocket = null;
-    public BTReadWriteThread btReadWriteThread;
-    private StringBuffer mReadBuffer;
-    private HandlerThread mHandlerThread;
     private ConnectThread mConnectThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mReadBuffer = new StringBuffer(1024);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_connect);
 
@@ -51,8 +45,6 @@ public class BTConnectActivity extends AppCompatActivity {
                     case ConnectThread.MessageConstants.MESSAGE_CONNECTED:
                         mSocket = (BluetoothSocket) msg.obj;
                         Snackbar.make(findViewById(R.id.display_message_layout), "Connected!", Snackbar.LENGTH_SHORT).show();
-//                        btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
-//                        btReadWriteThread.start();
                         // Update application
                         ((GlobalSettings)getApplication()).setConnected(true);
                         ((GlobalSettings)getApplication()).setDevice(mSocket.getRemoteDevice());
@@ -74,34 +66,18 @@ public class BTConnectActivity extends AppCompatActivity {
                                 findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
                             }
                         });
+                        mConnectThread.stop();
 
                         break;
                     case ConnectThread.MessageConstants.MESSAGE_ERROR:
                         Snackbar.make(findViewById(R.id.display_message_layout),"Could not connect", Snackbar.LENGTH_SHORT).show();
                         findViewById(R.id.textConnectingLabel).setVisibility(View.INVISIBLE);
                         findViewById(R.id.connectingProgressBar).setVisibility(View.INVISIBLE);
+                        mConnectThread.stop();
                         break;
-//                    case BTReadWriteThread.MessageConstants.MESSAGE_READ:
-//                        mReadBuffer.append((String)msg.obj);
-//                        if(mReadBuffer.toString().endsWith("\r\n")) {
-//                            Snackbar.make(findViewById(R.id.display_message_layout), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
-//                            mReadBuffer.delete(0, mReadBuffer.length());
-//                        }
-//                        break;
-//                    case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
-//                        break;
-//                    case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
-//                        break;
                 }
             }
         };
-
-        // Get the Intent that started this activity and extract the string
-//        Intent intent = getIntent();
-//        Bundle message = intent.getBundleExtra(MainActivity.BA_MESSAGE);
-//        ArrayList<String> mystrings = message.getStringArrayList(MainActivity.BA_LIST);
-//        String[] mystringarray = new String[mystrings.size()];
-//        mystringarray = mystrings.toArray(mystringarray);
 
         BA = BluetoothAdapter.getDefaultAdapter();
 
@@ -137,40 +113,20 @@ public class BTConnectActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?>adapter,View v, int position, long id){
-                //v.setSelected(true);
                 BluetoothDeviceViewModel item = (BluetoothDeviceViewModel)adapter.getItemAtPosition(position);
                 String name = item.getName();
                 String mac = item.getMac();
                 selectedBTDaddress = mac;
 
                 Snackbar.make(v, "Name: "+name+"\r\nAddress: "+mac,Snackbar.LENGTH_SHORT).show();
-
-
-//                Intent intent = new Intent(v.getContext(),destinationActivity.class);
-//                //based on item add info to intent
-//                startActivity(intent);
             }
         });
-    }
-
-    @Override
-    protected void onPause() {
-        // We can safely close the handler thread and its looper now
-//        mHandlerThread.quitSafely();
-//        HandlerThread thisGuyGonnaStopNow = mHandlerThread;
-//        mHandlerThread = null;
-//        thisGuyGonnaStopNow.interrupt();
-
-
-        super.onPause();
     }
 
     // Called when connect button is pressed
     public void ConnectToBTD(View view) {
         if(selectedBTDaddress != null) {
             BluetoothDevice mDevice = BA.getRemoteDevice(selectedBTDaddress);
-//            AcceptThread acceptThread = new AcceptThread();
-//            acceptThread.start();
 
             mConnectThread = new ConnectThread(mDevice,getResources().getString(R.string.bt_spp_uuid), mHandler);
             new Thread(mConnectThread).start();

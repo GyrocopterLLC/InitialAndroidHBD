@@ -28,6 +28,7 @@ public class BTReadWriteThread implements Runnable{
         int MESSAGE_READ = 2;
         int MESSAGE_WRITE = 3;
         int MESSAGE_ERROR = 4;
+        int MESSAGE_DISCONNECTED = 5;
     }
 
     public BTReadWriteThread(BluetoothSocket socket, Handler handler) {
@@ -40,12 +41,12 @@ public class BTReadWriteThread implements Runnable{
         // Get the socket's streams. Use temp holders first within the try block, since
         // we can't assign the final version until it succeeds
         try {
-            tmpIn = socket.getInputStream();
+            tmpIn = mSocket.getInputStream();
         } catch(IOException e) {
             Log.e(TAG, "Error occurred when creating input stream", e);
         }
         try {
-            tmpOut = socket.getOutputStream();
+            tmpOut = mSocket.getOutputStream();
         } catch(IOException e) {
             Log.e(TAG, "Error occurred when creating output stream", e);
         }
@@ -69,13 +70,19 @@ public class BTReadWriteThread implements Runnable{
                 for(int i = 0; i < numBytes; i++) {
                     newStringB.append((char)(mBuffer[i]));
                 }
-//                StringBuffer newStringB = new StringBuffer(new String(mBuffer, StandardCharsets.UTF_8));
-//                StringBuffer newString = new StringBuffer(mBuffer, 0, numBytes);
+
                 Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_READ, numBytes,
                         -1, newStringB);
                 readMsg.sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred while reading data. Input stream maybe disconnected.", e);
+                try {
+                    mSocket.close();
+                } catch(IOException eClose) {
+                    Log.e(TAG, "Could not close the client socket", eClose);
+                }
+                Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_DISCONNECTED);
+                readMsg.sendToTarget();
                 break;
             }
         }
@@ -87,7 +94,7 @@ public class BTReadWriteThread implements Runnable{
             for(int i = 0; i < stringB.length(); i++) {
                 bytes[i] = (byte)(stringB.charAt(i) & 0xFF);
             }
-//            byte[] bytes = stringB.toString().getBytes(StandardCharsets.UTF_8);
+
             mmOutStream.write(bytes);
 
             Message writtenMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_WRITE);

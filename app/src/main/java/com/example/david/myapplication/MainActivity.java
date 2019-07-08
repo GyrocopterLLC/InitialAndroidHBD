@@ -1,12 +1,10 @@
 package com.example.david.myapplication;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
@@ -21,7 +19,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MAIN_TAG = "DEBUG_LOG_MAIN_TAG";
@@ -31,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String SAVESPEED_KEY = "SAVESPEED_KEY";
     public static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter BA;
-    private Set<BluetoothDevice> pairedDevices;
-    private HandlerThread mHandlerThread;
     private Handler mHandler;
     private BluetoothSocket mSocket = null;
     public BTReadWriteThread btReadWriteThread;
@@ -83,10 +78,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if(!alreadyStarted) {
             if(BA.isEnabled()) {
-                // Yay it's enabled! For now, let's Toast.
+                // Yay it's enabled! For now, let's Snackbar.
                 Snackbar.make(findViewById(R.id.main_view), "Bluetooth is already enabled!",Snackbar.LENGTH_SHORT).setAction("No action",null).show();
-    //            Toast toast = Toast.makeText(this,"Bluetooth is already enabled!", Toast.LENGTH_SHORT);
-    //            toast.show();
             }
             else {
                 Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
@@ -171,6 +164,13 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
                             break;
+                        case BTReadWriteThread.MessageConstants.MESSAGE_DISCONNECTED:
+                            Snackbar.make(findViewById(R.id.main_view), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
+                            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
+                            ((GlobalSettings)getApplication()).setConnected(false);
+                            ((GlobalSettings)getApplication()).setDevice(null);
+                            ((GlobalSettings)getApplication()).setSocket(null);
+                            break;
                     }
                 }
             };
@@ -209,6 +209,11 @@ public class MainActivity extends AppCompatActivity {
                 char[] pktdata = {0x27, 0x01};
                 PacketTools packetTools = new PacketTools();
                 StringBuffer myBuf = packetTools.Pack((char) 0x01, pktdata);
+                if(((GlobalSettings)getApplication()).isConnected()){
+                    btReadWriteThread.write(myBuf);
+
+                }
+
                 StringBuffer dispString = new StringBuffer("pkt length: ");
                 dispString.append(myBuf.length());
                 dispString.append(" ");
@@ -216,12 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     dispString.append(String.format("0x%X,",(int)myBuf.charAt(i)));
                 }
                 Snackbar.make(findViewById(R.id.main_view), dispString, Snackbar.LENGTH_SHORT).show();
-                if(((GlobalSettings)getApplication()).isConnected()){
-                    btReadWriteThread.write(myBuf);
 
-                }
-                //mCurrentSpeed = 10.0f;
-                //mSpeedoView.setCurrentSpeed(mCurrentSpeed);
             }
         };
         mTimer.start();
