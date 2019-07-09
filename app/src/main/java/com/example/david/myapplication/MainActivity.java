@@ -3,10 +3,12 @@ package com.example.david.myapplication;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     float mCurrentThrottle;
     float mCurrentPhaseAmps;
     float mCurrentBatteryAmps;
+
+    private boolean askingForData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +141,29 @@ public class MainActivity extends AppCompatActivity {
                     switch (msg.what) {
                         case BTReadWriteThread.MessageConstants.MESSAGE_READ:
                             mReadBuffer.append(msg.obj);
+                            // Check if a valid packet has arrived
+                            Packet pkt = PacketTools.Unpack(mReadBuffer);
+                            if(pkt.SOPposition == -1) {
+                                // No SOPs were found. Delete all of it.
+                                mReadBuffer.delete(0, mReadBuffer.length());
+                            } else {
+                                if(pkt.PacketLength > 0) {
+                                    // Good packet!
+                                    mReadBuffer.delete(0,pkt.SOPposition+pkt.PacketLength);
+                                    if(pkt.PacketID == (char)0xA7) {
+                                        // This is our dashboard data response
+
+                                        mCurrentThrottle = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
+                                        mCurrentSpeed = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(4,8)));
+                                        mCurrentPhaseAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(8,12)));
+                                        mCurrentBatteryAmps= PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(12,16)));
+                                        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                                        mThrottleView.setThrottlePosition((int)mCurrentThrottle);
+                                        mPhaseView.setCurrentSpeed(mCurrentPhaseAmps);
+                                        mBatteryView.setCurrentSpeed(mCurrentBatteryAmps);
+                                    }
+                                }
+                            }
                             String allTheInput = mReadBuffer.toString();
                             if(allTheInput.endsWith("\r\n")) {
                                 if(allTheInput.startsWith("S:")) {
@@ -207,8 +235,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 char[] pktdata = {0x27, 0x01};
-                PacketTools packetTools = new PacketTools();
-                StringBuffer myBuf = packetTools.Pack((char) 0x01, pktdata);
+//                PacketTools packetTools = new PacketTools();
+                StringBuffer myBuf = PacketTools.Pack((char) 0x01, pktdata);
                 if(((GlobalSettings)getApplication()).isConnected()){
                     btReadWriteThread.write(myBuf);
 
@@ -226,6 +254,33 @@ public class MainActivity extends AppCompatActivity {
         };
         mTimer.start();
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    public void askForData(View v) {
+//        PacketTools pkt = new PacketTools();
+        if(!askingForData) {
+            // Start a timed event
+            mHandler.postDelayed(sendAskPacket,50);
+            askingForData = true;
+            ((Button)v).setText("STOP");
+        } else {
+            mHandler.removeCallbacks(sendAskPacket);
+            askingForData = false;
+            ((Button)v).setText("ASK FOR DATA");
+        }
+    }
+
+    Runnable sendAskPacket = new Runnable() {
+        @Override
+        public void run() {
+            StringBuffer myBuf = PacketTools.Pack((char) 0x27, new char[0]);
+            if (((GlobalSettings) getApplication()).isConnected()) {
+                btReadWriteThread.write(myBuf);
+            }
+
+            mHandler.postDelayed(sendAskPacket, 50);
+        }
+    };
 
     @Override
     protected void onDestroy() {

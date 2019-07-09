@@ -3,12 +3,22 @@ package com.example.david.myapplication;
 import java.util.zip.CRC32;
 
 public class PacketTools {
-    private final char SOP1 = 0x9A;
-    private final char SOP2 = 0xCC;
+    private static final char SOP1 = 0x9A;
+    private static final char SOP2 = 0xCC;
 
-    private CRC32 crc_generator = null;
+//    private CRC32 crc_generator = null;
 
-    public byte[] floatToBytes(float in_float) {
+    public static StringBuffer floatToString(float in_float) {
+        byte[] float_in_bytes = floatToBytes(in_float);
+        StringBuffer sb = new StringBuffer(4);
+        for(int i = 0; i < 4; i++) {
+            sb.append((char)(float_in_bytes[i]));
+        }
+
+        return sb;
+    }
+
+    public static byte[] floatToBytes(float in_float) {
         int int_bits = Float.floatToIntBits(in_float);
         return new byte[] {
                 (byte)((int_bits & 0xFF000000L) >> 24),
@@ -18,29 +28,43 @@ public class PacketTools {
         };
     }
 
-    public float bytesToFloat(byte[] in_bytes) {
-        int int_bits = ((int)(in_bytes[0]) << 24) +
-                ((int)(in_bytes[1]) << 16) +
-                ((int)(in_bytes[2]) << 8) +
-                ((int)(in_bytes[3]));
+    public static float stringToFloat(StringBuffer in_string) {
+        byte[] in_bytes = new byte[4];
+        for(int i = 0; i<4; i++) {
+            in_bytes[i] = (byte)(in_string.charAt(i));
+        }
+        return bytesToFloat(in_bytes);
+    }
 
+    public static float bytesToFloat(byte[] in_bytes) {
+        // Enforce a byte to unsigned int conversion
+        // Newer API can use Byte.toUnsignedInt(), but honestly it's the same thing.
+        int int_bits =  ((((int)in_bytes[0])&0xFF) << 24) +
+                        ((((int)in_bytes[1])&0xFF) << 16) +
+                        ((((int)in_bytes[2])&0xFF) << 8) +
+                        (((int) in_bytes[3]) & 0xFF);
         return Float.intBitsToFloat(int_bits);
     }
 
-    public StringBuffer create_crc32_packed(StringBuffer protectMe) {
+    public static StringBuffer create_crc32_packed(StringBuffer input) {
 
+        StringBuffer protectMe;
         StringBuffer retStringB = new StringBuffer(4);
 
-        if(crc_generator == null) {
-            crc_generator = new CRC32();
-        }
+
+        CRC32 crc_generator = new CRC32();
+
         crc_generator.reset();
 
-        if(protectMe.length() % 4 != 0) {
+        if(input.length() % 4 != 0) {
+            // Make a copy
+            protectMe = new StringBuffer(input);
             int addZeros = 4 - (protectMe.length() % 4);
             for (int i = 0; i < addZeros; i++) {
                 protectMe.append((char) 0);
             }
+        } else {
+            protectMe = input;
         }
 
         byte[] toGenerate = new byte[protectMe.length()];
@@ -70,7 +94,7 @@ public class PacketTools {
      *   6->6+n: data
      * 7+n-10+n: CRC32 on bytes 0->6+n
      */
-    public StringBuffer Pack(char packetID, char[] data) {
+    public static StringBuffer Pack(char packetID, char[] data) {
         StringBuffer retStringB = new StringBuffer(data.length+10);
 
         // add SOP bytes
@@ -96,7 +120,7 @@ public class PacketTools {
         return retStringB;
     }
 
-    public Packet Unpack(StringBuffer raw_bytes) {
+    public static Packet Unpack(StringBuffer raw_bytes) {
         int bytes_len = raw_bytes.length();
         int data_len = 0;
         char packet_type, nPacket_type;
@@ -129,14 +153,14 @@ public class PacketTools {
                 data_len = (int) (raw_bytes.charAt(retPacket.SOPposition + 4)) << 8;
                 data_len += (int) (raw_bytes.charAt(retPacket.SOPposition + 5));
                 // Now check if rest of packet is good length
-                if(bytes_len > retPacket.SOPposition + data_len + 10) {
+                if(bytes_len >= retPacket.SOPposition + data_len + 10) {
                     // Enough bytes, excellent.
                     data = new StringBuffer(raw_bytes.substring(retPacket.SOPposition + 6,
                             retPacket.SOPposition + 6 + data_len));
                     // Check the CRC.
-                    StringBuffer crc_local = new StringBuffer(raw_bytes.substring(retPacket.SOPposition,
-                            retPacket.SOPposition+6+data_len));
-                    StringBuffer crc_remote = new StringBuffer(raw_bytes.substring(retPacket.SOPposition + 7 + data_len,
+                    StringBuffer crc_local = create_crc32_packed(new StringBuffer(raw_bytes.substring(retPacket.SOPposition,
+                            retPacket.SOPposition+6+data_len)));
+                    StringBuffer crc_remote = new StringBuffer(raw_bytes.substring(retPacket.SOPposition + 6 + data_len,
                             retPacket.SOPposition + 10 + data_len));
                     if(crc_local.toString().equals(crc_remote.toString())) {
                         // CRC32 is good!
