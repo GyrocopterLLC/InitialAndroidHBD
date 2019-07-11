@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SpeedometerView">
-        <attr name="max_speed" format="float"></attr>
-        <attr name="units" format="string"></attr>
-        <attr name="current_speed" format="float"></attr>
-        <attr name="on_color" format="color"></attr>
-        <attr name="off_color" format="color"></attr>
-        <attr name="scale_color" format="color"></attr>
-        <attr name="text_shadow_color" format="color"></attr>
-        <attr name="scale_text_size" format="dimension"></attr>
-        <attr name="reading_text_size" format="dimension"></attr>
-        <attr name="scale_spacing" format="integer"></attr>
+    <declare-styleable name="GaugeView">
+        <attr name="max_value" format="float" />
+        <attr name="units" format="string" />
+        <attr name="current_value" format="float" />
+        <attr name="on_color" format="color" />
+        <attr name="off_color" format="color" />
+        <attr name="scale_color" format="color" />
+        <attr name="display_scale" format="boolean"/>
+        <attr name="text_shadow_color" format="color" />
+        <attr name="scale_text_size" format="dimension" />
+        <attr name="reading_text_size" format="dimension" />
+        <attr name="scale_spacing" format="integer" />
+        <attr name="bidirectional" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="ThrottleView">

@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private CountDownTimer mTimer;
     private boolean mSpeedDir = false;
 
-    SpeedometerView mSpeedoView, mPhaseView, mBatteryView;
+    GaugeView mSpeedoView, mPhaseView, mBatteryView;
     ThrottleView mThrottleView;
     float mCurrentSpeed;
     float mCurrentThrottle;
@@ -57,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         // Setup speedometer
-        mSpeedoView = (SpeedometerView) findViewById(R.id.speedometer);
+        mSpeedoView = (GaugeView) findViewById(R.id.speedometer);
         mThrottleView = (ThrottleView) findViewById(R.id.throttleBar);
-        mPhaseView = (SpeedometerView) findViewById(R.id.phaseCurrentBar);
-        mBatteryView = (SpeedometerView) findViewById(R.id.batteryCurrentBar);
+        mPhaseView = (GaugeView) findViewById(R.id.phaseCurrentBar);
+        mBatteryView = (GaugeView) findViewById(R.id.batteryCurrentBar);
         mCurrentSpeed = 0;
         mCurrentThrottle = 0;
         mCurrentBatteryAmps = 0;
@@ -157,10 +157,10 @@ public class MainActivity extends AppCompatActivity {
                                         mCurrentSpeed = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(4,8)));
                                         mCurrentPhaseAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(8,12)));
                                         mCurrentBatteryAmps= PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(12,16)));
-                                        mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                                        mSpeedoView.setCurrentValue(mCurrentSpeed);
                                         mThrottleView.setThrottlePosition((int)mCurrentThrottle);
-                                        mPhaseView.setCurrentSpeed(mCurrentPhaseAmps);
-                                        mBatteryView.setCurrentSpeed(mCurrentBatteryAmps);
+                                        mPhaseView.setCurrentValue(mCurrentPhaseAmps);
+                                        mBatteryView.setCurrentValue(mCurrentBatteryAmps);
                                     }
                                 }
                             }
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                                 if(allTheInput.startsWith("S:")) {
                                     // Speed data coming in
                                     mCurrentSpeed = getFloat(allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentSpeed);
-                                    mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                                    mSpeedoView.setCurrentValue(mCurrentSpeed);
                                 }
                                 if(allTheInput.startsWith("T:")) {
                                     mCurrentThrottle = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentThrottle);
@@ -177,11 +177,11 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 if(allTheInput.startsWith("P:")) {
                                     mCurrentPhaseAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentPhaseAmps);
-                                    mPhaseView.setCurrentSpeed(mCurrentPhaseAmps);
+                                    mPhaseView.setCurrentValue(mCurrentPhaseAmps);
                                 }
                                 if(allTheInput.startsWith("B:")) {
                                     mCurrentBatteryAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentBatteryAmps);
-                                    mBatteryView.setCurrentSpeed(mCurrentBatteryAmps);
+                                    mBatteryView.setCurrentValue(mCurrentBatteryAmps);
                                 }
 
                                 Snackbar.make(findViewById(R.id.main_view), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
@@ -227,7 +227,9 @@ public class MainActivity extends AppCompatActivity {
                         mSpeedDir = true;
                     }
                 }
-                mSpeedoView.setCurrentSpeed(mCurrentSpeed);
+                mSpeedoView.setCurrentValue(mCurrentSpeed);
+                mPhaseView.setCurrentValue(mPhaseView.getMaxValue()*(2.0f*mCurrentSpeed/30.0f - 1.0f));
+                mBatteryView.setCurrentValue(mBatteryView.getMaxValue()*(1.0f-2.0f*mCurrentSpeed/30.0f));
                 ThrottleView pb = (ThrottleView) findViewById(R.id.throttleBar);
                 pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
             }
