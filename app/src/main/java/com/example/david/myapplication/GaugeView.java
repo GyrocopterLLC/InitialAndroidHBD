@@ -34,11 +34,10 @@ public class GaugeView extends View {
     // Drawing colors
     private int ON_COLOR = Color.argb(255, 0xff, 0xA5, 0x00);
     private int OFF_COLOR = Color.argb(255,0x3e,0x3e,0x3e);
-    private int SCALE_COLOR = Color.argb(255, 255, 255, 255);
-    private int TEXT_SHADOW_COLOR = Color.RED;
+    private int TEXT_COLOR = Color.argb(255, 255, 255, 255);
     private int SCALE_SPACING = 20;
-    private float SCALE_SIZE = 14f;
-    private float READING_SIZE = 60f;
+    private float SCALE_TEXT_SIZE = 14f;
+    private float TEXT_SIZE = 60f;
     private String UNITS;
     private boolean BIDIRECTIONAL = false;
     private boolean DISPLAY_SCALE = false;
@@ -62,17 +61,17 @@ public class GaugeView extends View {
                 0, 0);
         try{
             mMaxValue = a.getFloat(R.styleable.GaugeView_max_value, DEFAULT_MAX_VALUE);
+            UNITS = a.getString(R.styleable.GaugeView_units);
             mCurrentValue = a.getFloat(R.styleable.GaugeView_current_value, 0);
             ON_COLOR = a.getColor(R.styleable.GaugeView_on_color, ON_COLOR);
             OFF_COLOR = a.getColor(R.styleable.GaugeView_off_color, OFF_COLOR);
-            SCALE_COLOR = a.getColor(R.styleable.GaugeView_scale_color, SCALE_COLOR);
-            SCALE_SIZE = a.getDimension(R.styleable.GaugeView_scale_text_size, SCALE_SIZE);
-            READING_SIZE = a.getDimension(R.styleable.GaugeView_reading_text_size, READING_SIZE);
-            SCALE_SPACING = a.getInt(R.styleable.GaugeView_scale_spacing, SCALE_SPACING);
-            TEXT_SHADOW_COLOR = a.getColor(R.styleable.GaugeView_text_shadow_color, TEXT_SHADOW_COLOR);
-            UNITS = a.getString(R.styleable.GaugeView_units);
-            BIDIRECTIONAL = a.getBoolean(R.styleable.GaugeView_bidirectional, BIDIRECTIONAL);
+            TEXT_COLOR = a.getColor(R.styleable.GaugeView_text_color, TEXT_COLOR);
+            TEXT_SIZE = a.getDimension(R.styleable.GaugeView_text_size, TEXT_SIZE);
             DISPLAY_SCALE = a.getBoolean(R.styleable.GaugeView_display_scale, DISPLAY_SCALE);
+            SCALE_TEXT_SIZE = a.getDimension(R.styleable.GaugeView_scale_text_size, SCALE_TEXT_SIZE);
+            SCALE_SPACING = a.getInt(R.styleable.GaugeView_scale_spacing, SCALE_SPACING);
+            BIDIRECTIONAL = a.getBoolean(R.styleable.GaugeView_bidirectional, BIDIRECTIONAL);
+
         } finally{
             a.recycle();
         }
@@ -203,29 +202,96 @@ public class GaugeView extends View {
         canvas.save();
         canvas.rotate(-180, centerX,centerY);
         Path circle = new Path();
-        double halfCircumference = radius * Math.PI;
+        double quarterCircumference = radius * Math.PI / 2.0;
         double increments = SCALE_SPACING;
-        circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
-        for(int i = 0; i < this.mMaxValue; i += increments){
-
-            canvas.drawTextOnPath(String.format("%d", i),
+        double halfCircumference = radius * Math.PI;
+        String message;
+        float[] widths;
+        float advance;
+        if(BIDIRECTIONAL) {
+            circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
+            // Draw the first entry (negative max value)
+            canvas.drawTextOnPath(String.format("%d",(int)(-this.mMaxValue)),
                     circle,
-                    (float) (i*halfCircumference/this.mMaxValue),
+                    0f,
                     -30f,
                     scalePaint);
+            // Draw entries up to but not including zero
+
+            for(int i = (int)(-this.mMaxValue+increments); i < 0; i += increments) {
+                message = String.format("%d", i);
+                widths = new float[message.length()];
+                scalePaint.getTextWidths(message, widths);
+                advance = 0;
+                for(float wid: widths) advance += wid;
+                canvas.drawTextOnPath(String.format("%d",i),
+                        circle,
+                        (float)quarterCircumference + (float)(i*quarterCircumference/this.mMaxValue)-advance/2f,
+                        -30f,
+                        scalePaint);
+            }
+            // Make sure that zero is printed
+            message = String.format("%d",0);
+            widths = new float[message.length()];
+            scalePaint.getTextWidths(message, widths);
+            advance = 0;
+            for(float wid: widths) advance += wid;
+            canvas.drawTextOnPath(String.format("%d",0),
+                    circle,
+                    (float)quarterCircumference - advance / 2f,
+                    -30f,
+                    scalePaint);
+            // Print remaining up to but not including max value
+            for(int i = (int)(increments); i < (int)this.mMaxValue; i += increments) {
+                message = String.format("%d", i);
+                widths = new float[message.length()];
+                scalePaint.getTextWidths(message, widths);
+                advance = 0;
+                for(float wid: widths) advance += wid;
+                canvas.drawTextOnPath(String.format("%d",i),
+                        circle,
+                        (float)quarterCircumference + (float)(i*quarterCircumference/this.mMaxValue)-advance/2f,
+                        -30f,
+                        scalePaint);
+            }
+            // Print max value
+        } else {
+
+            circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
+            // First entry (zero) needs no offset
+            canvas.drawTextOnPath(String.format("%d",0),
+                    circle,
+                    0f,
+                    -30f,
+                    scalePaint);
+            // Draw remaining numbers up to but not including max
+            for (int i = (int)increments; i < (int)this.mMaxValue; i += (int)increments) {
+                message = String.format("%d", i);
+                widths = new float[message.length()];
+                scalePaint.getTextWidths(message,widths);
+                advance = 0;
+                for(double wid:widths) advance += wid;
+                canvas.drawTextOnPath(message,
+                        circle,
+                        (float) (i * halfCircumference / this.mMaxValue) - advance/2f,
+                        -30f,
+                        scalePaint);
+            }
+
+            //circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
+
         }
         // Add final entry for maximum value
-        //circle.addCircle(centerX, centerY, radius, Path.Direction.CW);
-        String message = String.format("%d",(int)this.mMaxValue);
-        float[] widths = new float[message.length()];
-        scalePaint.getTextWidths(message,widths);
-        float advance = 0;
-        for(double wid:widths) advance += wid;
-        canvas.drawTextOnPath(  String.format("%d",(int)this.mMaxValue),
-                                circle,
-                                ((float) (halfCircumference))- advance,
-                                -30f,
-                                scalePaint);
+        message = String.format("%d", (int) this.mMaxValue);
+        widths = new float[message.length()];
+        scalePaint.getTextWidths(message, widths);
+        advance = 0;
+        for (double wid : widths) advance += wid;
+        canvas.drawTextOnPath(String.format("%d", (int) this.mMaxValue),
+                circle,
+                ((float) (halfCircumference)) - advance,
+                -30f,
+                scalePaint);
 
 
         canvas.restore();
@@ -252,7 +318,7 @@ public class GaugeView extends View {
 
         // Setting up the oval area in which the arc will be drawn
         // Oval will take up ~80% of the View's area
-        radius = width/2 - 30.0f - SCALE_SIZE;  // Subtract the width of the scale text and
+        radius = width/2 - 30.0f - SCALE_TEXT_SIZE;  // Subtract the width of the scale text and
                                                 // its offset
 
         oval.set(centerX - radius,
@@ -276,24 +342,20 @@ public class GaugeView extends View {
 
         scalePaint = new Paint(offMarkPaint);
         scalePaint.setStrokeWidth(2f);
-        scalePaint.setTextSize(SCALE_SIZE);
+        scalePaint.setTextSize(SCALE_TEXT_SIZE);
         scalePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        scalePaint.setShadowLayer(5f, 0f, 0f, TEXT_SHADOW_COLOR);
-        scalePaint.setColor(SCALE_COLOR);
+        scalePaint.setColor(TEXT_COLOR);
 
         readingPaint = new Paint(scalePaint);
         readingPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        readingPaint.setShadowLayer(3f, 0f, 0f, TEXT_SHADOW_COLOR);
-        readingPaint.setTextSize(65f);
+        readingPaint.setTextSize(TEXT_SIZE);
         readingPaint.setTypeface(Typeface.SANS_SERIF);
-        readingPaint.setColor(SCALE_COLOR);
+        readingPaint.setColor(TEXT_COLOR);
 
         valueTickPaint = new Paint();
         valueTickPaint.setStyle(Paint.Style.STROKE);
-        valueTickPaint.setShadowLayer(3f, 0f, 0f, TEXT_SHADOW_COLOR);
-        valueTickPaint.setColor(SCALE_COLOR);
+        valueTickPaint.setColor(TEXT_COLOR);
         valueTickPaint.setStrokeWidth(5f);
-
 
         onPath = new Path();
         offPath = new Path();

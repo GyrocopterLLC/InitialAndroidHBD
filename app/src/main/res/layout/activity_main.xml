@@ -28,12 +28,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:max_value="30"
-        app:reading_text_size="36sp"
-        app:scale_color="@android:color/black"
-        app:scale_spacing="5"
-        app:scale_text_size="12sp"
+        app:bidirectional="false"
+        app:on_color="@color/colorPrimary"
+        app:off_color="@color/colorInactive"
+        app:text_size="48sp"
+        app:text_color="@color/colorPrimaryDark"
         app:display_scale="true"
-        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:scale_text_size="16sp"
+        app:scale_spacing="5"
         app:units="mph" />
 
     <View
@@ -56,6 +58,7 @@
         android:layout_marginRight="8dp"
         android:text="TextView"
         android:textSize="24sp"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,6 +88,7 @@
         android:text="@string/phase_current"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/phaseCurrentBar" />
 
@@ -98,14 +102,15 @@
         app:layout_constraintEnd_toStartOf="@+id/batteryCurrentBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info"
-        app:max_value="25"
+        app:max_value="30"
         app:bidirectional="true"
-        app:reading_text_size="16sp"
-        app:scale_color="@android:color/black"
-        app:scale_spacing="5"
-        app:scale_text_size="10sp"
+        app:on_color="@color/colorPrimary"
+        app:off_color="@color/colorInactive"
+        app:text_size="24sp"
+        app:text_color="@color/colorPrimaryDark"
         app:display_scale="true"
-        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:scale_text_size="10sp"
+        app:scale_spacing="10"
         app:units="A" />
 
     <!--<ProgressBar-->
@@ -130,6 +135,7 @@
         android:text="@string/battery_current"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/batteryCurrentBar" />
 
@@ -143,14 +149,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/phaseCurrentBar"
         app:layout_constraintTop_toBottomOf="@+id/text_btdevice_info"
-        app:max_value="25"
+        app:max_value="30"
         app:bidirectional="true"
-        app:reading_text_size="16sp"
-        app:scale_color="@android:color/black"
-        app:scale_spacing="5"
-        app:scale_text_size="10sp"
+        app:on_color="@color/colorPrimary"
+        app:off_color="@color/colorInactive"
+        app:text_size="24sp"
+        app:text_color="@color/colorPrimaryDark"
         app:display_scale="true"
-        app:text_shadow_color="@android:color/holo_blue_bright"
+        app:scale_text_size="10sp"
+        app:scale_spacing="10"
         app:units="A" />
 
     <Button
@@ -159,8 +166,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:background="#5C6BC0"
         android:onClick="onClick"
         android:text="Simulate"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_current_phase" />
 
@@ -170,8 +179,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:background="#5C6BC0"
         android:onClick="askForData"
         android:text="Ask for Data"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toEndOf="@+id/button"
         app:layout_constraintTop_toBottomOf="@+id/text_current_battery" />
     <!--<ProgressBar-->

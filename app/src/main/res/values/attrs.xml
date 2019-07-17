@@ -6,11 +6,10 @@
         <attr name="current_value" format="float" />
         <attr name="on_color" format="color" />
         <attr name="off_color" format="color" />
-        <attr name="scale_color" format="color" />
+        <attr name="text_color" format="color" />
+        <attr name="text_size" format="dimension" />
         <attr name="display_scale" format="boolean"/>
-        <attr name="text_shadow_color" format="color" />
         <attr name="scale_text_size" format="dimension" />
-        <attr name="reading_text_size" format="dimension" />
         <attr name="scale_spacing" format="integer" />
         <attr name="bidirectional" format="boolean" />
     </declare-styleable>

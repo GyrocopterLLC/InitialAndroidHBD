@@ -54,7 +54,7 @@ public class ThrottleView extends View {
 //        mBarPaint.setStyle(Paint.Style.FILL);
 
         mMarkerPaint = new Paint();
-        mMarkerPaint.setColor(Color.argb(255,0,0,0));
+        mMarkerPaint.setColor(Color.argb(255,255,255,255));
         mMarkerPaint.setStyle(Paint.Style.FILL);
 
         mMarkerPath = new Path();
