@@ -5,7 +5,7 @@
         android:id="@+id/action_connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:icon="@drawable/ic_connect_drawing"
+        android:icon="@drawable/ic_plug_silhouette_svgrepo_com"
         android:title="@string/action_connect"
         app:showAsAction="ifRoom" />
     <item

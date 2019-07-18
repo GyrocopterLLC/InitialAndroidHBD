@@ -16,19 +16,23 @@ public class ThrottleView extends View {
     private static final int DEFAULT_GRADIENT_START = 75;
     private static final int DEFAULT_MIN_COLOR = Color.argb(255, 0, 255, 0);
     private static final int DEFAULT_MAX_COLOR = Color.argb(255,255,0,0);
+    private static final int DEFAULT_MARKER_COLOR = Color.argb(255,255,255,255);
     private static final int DEFAULT_WIDTH = 30;
     private static final int DEFAULT_HEIGHT = 100;
     private static final int DEFAULT_MARGIN = 32;
 
     private int mMinColor = DEFAULT_MIN_COLOR;
     private int mMaxColor = DEFAULT_MAX_COLOR;
+    private int mMarkerColor = DEFAULT_MARKER_COLOR;
     private int mGradientStart = DEFAULT_GRADIENT_START;
     private int mWidth = DEFAULT_WIDTH;
     private int mHeight = DEFAULT_HEIGHT;
     private int mThrottlePosition = 0;
 
     private Paint mBarPaint;
-    private Path mMarkerPath;
+    private Path mMarkerCPath;
+    private Path mMarkerLPath;
+    private Path mMarkerRPath;
     private Paint mMarkerPaint;
     private Rect mThrottleBar;
     private float[] mGradientPoints = new float[5];
@@ -46,6 +50,7 @@ public class ThrottleView extends View {
         try{
             mMinColor = a.getColor(R.styleable.ThrottleView_min_color, DEFAULT_MIN_COLOR);
             mMaxColor = a.getColor(R.styleable.ThrottleView_max_color, DEFAULT_MAX_COLOR);
+            mMarkerColor = a.getColor(R.styleable.ThrottleView_marker_color, DEFAULT_MARKER_COLOR);
             mGradientStart = a.getInt(R.styleable.ThrottleView_gradient_start, DEFAULT_GRADIENT_START);
         } finally{
             a.recycle();
@@ -54,10 +59,13 @@ public class ThrottleView extends View {
 //        mBarPaint.setStyle(Paint.Style.FILL);
 
         mMarkerPaint = new Paint();
-        mMarkerPaint.setColor(Color.argb(255,255,255,255));
-        mMarkerPaint.setStyle(Paint.Style.FILL);
+        mMarkerPaint.setColor(mMarkerColor);
+        mMarkerPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mMarkerPaint.setStrokeWidth(5f);
 
-        mMarkerPath = new Path();
+        mMarkerLPath = new Path();
+        mMarkerRPath = new Path();
+        mMarkerCPath = new Path();
         mBarPaint = new Paint();
         mThrottleBar = new Rect();
     }
@@ -65,15 +73,23 @@ public class ThrottleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-//        drawThrottleBar();
         canvas.drawRect(mThrottleBar,mBarPaint);
-//        drawThrottleMarker();
-        mMarkerPath.reset();
-        mMarkerPath.moveTo(DEFAULT_MARGIN,mHeight*(100-mThrottlePosition)/100);
-        mMarkerPath.lineTo(0, mHeight*(100-mThrottlePosition)/100-DEFAULT_MARGIN/2);
-        mMarkerPath.lineTo(0,mHeight*(100-mThrottlePosition)/100+DEFAULT_MARGIN/2);
-        mMarkerPath.lineTo(DEFAULT_MARGIN, mHeight*(100-mThrottlePosition)/100);
-        canvas.drawPath(mMarkerPath,mMarkerPaint);
+        mMarkerCPath.reset();
+        mMarkerCPath.moveTo(DEFAULT_MARGIN/2,mHeight*(100-mThrottlePosition)/100);
+        mMarkerCPath.lineTo(mWidth-DEFAULT_MARGIN/2, mHeight*(100-mThrottlePosition)/100);
+        canvas.drawPath(mMarkerCPath,mMarkerPaint);
+        mMarkerLPath.reset();
+        mMarkerLPath.moveTo(DEFAULT_MARGIN/2,mHeight*(100-mThrottlePosition)/100);
+        mMarkerLPath.lineTo(0, mHeight*(100-mThrottlePosition)/100-DEFAULT_MARGIN/4);
+        mMarkerLPath.lineTo(0,mHeight*(100-mThrottlePosition)/100+DEFAULT_MARGIN/4);
+        mMarkerLPath.lineTo(DEFAULT_MARGIN/2, mHeight*(100-mThrottlePosition)/100);
+        canvas.drawPath(mMarkerLPath,mMarkerPaint);
+        mMarkerRPath.reset();
+        mMarkerRPath.moveTo(mWidth-DEFAULT_MARGIN/2,mHeight*(100-mThrottlePosition)/100);
+        mMarkerRPath.lineTo(mWidth-1, mHeight*(100-mThrottlePosition)/100 - DEFAULT_MARGIN/4);
+        mMarkerRPath.lineTo(mWidth-1, mHeight*(100-mThrottlePosition)/100 + DEFAULT_MARGIN/4);
+        mMarkerRPath.lineTo(mWidth-DEFAULT_MARGIN/2, mHeight*(100-mThrottlePosition)/100);
+        canvas.drawPath(mMarkerRPath,mMarkerPaint);
     }
 
     @Override
@@ -123,8 +139,8 @@ public class ThrottleView extends View {
                 mColorPoints,mGradientPoints,
                 Shader.TileMode.CLAMP));
 
-        mThrottleBar.set(DEFAULT_MARGIN,0,
-                mWidth,mHeight);
+        mThrottleBar.set(DEFAULT_MARGIN/2,0,
+                mWidth-DEFAULT_MARGIN/2,mHeight);
 
     }
 

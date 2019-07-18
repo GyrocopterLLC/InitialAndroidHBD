@@ -17,6 +17,7 @@
     <declare-styleable name="ThrottleView">
         <attr name="min_color" format="color"/>
         <attr name="max_color" format="color"/>
+        <attr name="marker_color" format="color" />
         <attr name="gradient_start" format="integer"/>
     </declare-styleable>
 
