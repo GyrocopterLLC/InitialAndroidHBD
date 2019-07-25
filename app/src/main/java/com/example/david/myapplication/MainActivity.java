@@ -82,11 +82,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(MAIN_TAG, "Could not read from bundle.");
         }
         if(!alreadyStarted) {
-            if(BA.isEnabled()) {
-                // Yay it's enabled! For now, let's Snackbar.
-                Snackbar.make(findViewById(R.id.main_view), "Bluetooth is already enabled!",Snackbar.LENGTH_SHORT).setAction("No action",null).show();
-            }
-            else {
+            if(!BA.isEnabled()) {
                 Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -236,22 +232,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                char[] pktdata = {0x27, 0x01};
-//                PacketTools packetTools = new PacketTools();
-                StringBuffer myBuf = PacketTools.Pack((char) 0x01, pktdata);
-                if(((GlobalSettings)getApplication()).isConnected()){
-                    btReadWriteThread.write(myBuf);
-
-                }
-
-                StringBuffer dispString = new StringBuffer("pkt length: ");
-                dispString.append(myBuf.length());
-                dispString.append(" ");
-                for(int i = 0; i< myBuf.length(); i++) {
-                    dispString.append(String.format("0x%X,",(int)myBuf.charAt(i)));
-                }
-                Snackbar.make(findViewById(R.id.main_view), dispString, Snackbar.LENGTH_SHORT).show();
-
+                // Nothing nada zilch
             }
         };
         mTimer.start();
@@ -260,15 +241,19 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.P)
     public void askForData(View v) {
 //        PacketTools pkt = new PacketTools();
-        if(!askingForData) {
-            // Start a timed event
-            mHandler.postDelayed(sendAskPacket,50);
-            askingForData = true;
-            ((Button)v).setText("STOP");
+        if (((GlobalSettings) getApplication()).isConnected()) {
+            if (!askingForData) {
+                // Start a timed event
+                mHandler.postDelayed(sendAskPacket, 50);
+                askingForData = true;
+                ((Button) v).setText("STOP");
+            } else {
+                mHandler.removeCallbacks(sendAskPacket);
+                askingForData = false;
+                ((Button) v).setText("ASK FOR DATA");
+            }
         } else {
-            mHandler.removeCallbacks(sendAskPacket);
-            askingForData = false;
-            ((Button)v).setText("ASK FOR DATA");
+            Snackbar.make(findViewById(R.id.main_view), "No connected device!", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -280,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
                 btReadWriteThread.write(myBuf);
             }
 
-            mHandler.postDelayed(sendAskPacket, 50);
+            mHandler.postDelayed(this, 50);
         }
     };
 
