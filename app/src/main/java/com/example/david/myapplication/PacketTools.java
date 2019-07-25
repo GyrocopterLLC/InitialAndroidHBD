@@ -36,6 +36,14 @@ public class PacketTools {
         return bytesToFloat(in_bytes);
     }
 
+    public static int stringToInt(StringBuffer in_string) {
+        int out_int = 0;
+        for(int i = 0; i<4; i++) {
+            out_int += ((byte)(in_string.charAt(i))) << (8*i);
+        }
+        return out_int;
+    }
+
     public static float bytesToFloat(byte[] in_bytes) {
         // Enforce a byte to unsigned int conversion
         // Newer API can use Byte.toUnsignedInt(), but honestly it's the same thing.

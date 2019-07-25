@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MAIN_TAG = "DEBUG_LOG_MAIN_TAG";
@@ -44,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
     float mCurrentThrottle;
     float mCurrentPhaseAmps;
     float mCurrentBatteryAmps;
+    float mCurrentBatteryVolts;
+    float mCurrentFetTemp;
+    float mCurrentMotorTemp;
+    int mCurrentFaultCode;
 
     private boolean askingForData = false;
 
@@ -152,11 +157,18 @@ public class MainActivity extends AppCompatActivity {
                                         mCurrentThrottle = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
                                         mCurrentSpeed = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(4,8)));
                                         mCurrentPhaseAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(8,12)));
-                                        mCurrentBatteryAmps= PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(12,16)));
+                                        mCurrentBatteryAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(12,16)));
+                                        mCurrentBatteryVolts = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(16,20)));
+                                        mCurrentFetTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(20,24)));
+                                        mCurrentMotorTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(24,28)));
+                                        mCurrentFaultCode = PacketTools.stringToInt(new StringBuffer(pkt.Data.substring(28,32)));
                                         mSpeedoView.setCurrentValue(mCurrentSpeed);
                                         mThrottleView.setThrottlePosition((int)mCurrentThrottle);
                                         mPhaseView.setCurrentValue(mCurrentPhaseAmps);
                                         mBatteryView.setCurrentValue(mCurrentBatteryAmps);
+                                        ((TextView)findViewById(R.id.batteryVoltageDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentBatteryVolts));
+                                        ((TextView)findViewById(R.id.fetTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentFetTemp));
+                                        ((TextView)findViewById(R.id.motorTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentMotorTemp));
                                     }
                                 }
                             }
