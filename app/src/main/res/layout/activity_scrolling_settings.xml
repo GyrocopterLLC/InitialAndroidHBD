@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/scrolling_settings_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/Theme.AppCompat.Light" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/scrolling_settings_toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                tools:context=".settingsFragments.SettingsFOC">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/var_name"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/ram_val"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/eeprom_val"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </GridLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                tools:context=".settingsFragments.SettingsFOC">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="ADC Settings"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="TIA Gain"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/adc_ram_tia_gain"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="20.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/adc_eeprom_tia_gain"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="20.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Vbus Ratio"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/adc_ram_vbus_ratio"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="33.36246"
+                    android:textSize="16sp" />
+
+
+                <TextView
+                    android:id="@+id/adc_eeprom_vbus_ratio"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="33.36246"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Therm Fixed Res"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/adc_ram_therm_fixed_r"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="10000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/adc_eeprom_therm_fixed_r"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="10000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Therm R25"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/adc_ram_therm_r25"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="10000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/adc_eeprom_therm_r25"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="10000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Therm B"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/adc_ram_therm_b"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="3984.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/adc_eeprom_therm_b"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="3984.0"
+                    android:textSize="16sp" />
+            </GridLayout>
+
+            <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                tools:context=".settingsFragments.SettingsFOC">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Main Settings"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Counts to FOC"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/main_ram_counts_to_foc"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="1000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/main_eeprom_counts_to_foc"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="1000"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Speed to FOC"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/main_ram_speed_to_foc"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="10.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/main_eeprom_speed_to_foc"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="10.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Switch Eps"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/main_ram_switch_eps"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.008333"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/main_eeprom_switch_eps"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.008333"
+                    android:textSize="16sp" />
+            </GridLayout>
+
+            <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                tools:context=".settingsFragments.SettingsFOC">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Throttle Settings"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text=""
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Type"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_type1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_type1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="1"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Min"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_min1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.85"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_min1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.85"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Max"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_max1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="2.20"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_max1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="2.20"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Hyst"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_hyst1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.025"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_hyst1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.025"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Filt"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_filt1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="2.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_filt1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="2.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr1 Rise"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_rise1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.0005"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_rise1"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.0005"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Type"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_type2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_type2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Min"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_min2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.85"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_min2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.85"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Max"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_max2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="2.20"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_max2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="2.20"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Hyst"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_hyst2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.025"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_hyst2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.025"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Filt"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_filt2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="2.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_filt2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="2.0"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Thr2 Rise"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/thr_ram_rise2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:inputType="number"
+                    android:text="0.0005"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/thr_eeprom_rise2"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0.0005"
+                    android:textSize="16sp" />
+            </GridLayout>
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:context=".settingsFragments.SettingsFOC">
+
+                <Button
+                    android:id="@+id/btn_data_save_ram"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/ram_commit"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/btn_data_save_eeprom"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/btn_data_save_eeprom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/eeprom_commit"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btn_data_save_ram"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
+    </ScrollView>
+
+
+</android.support.constraint.ConstraintLayout>
