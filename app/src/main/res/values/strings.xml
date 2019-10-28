@@ -13,8 +13,8 @@
     <string name="battery_current">Battery Current</string>
     <string name="connecting">Connecting...</string>
     <string name="var_name">Variable Name</string>
-    <string name="eeprom_val">EEPROM Value</string>
-    <string name="ram_val">RAM Value</string>
+    <string name="eeprom_val">EEPROM</string>
+    <string name="ram_val">RAM</string>
     <string name="kp">Kp</string>
     <string name="dt">DT</string>
     <string name="kc">Kc</string>
@@ -27,6 +27,7 @@
     <string name="speed">Data Speed</string>
     <string name="settings_title">Settings</string>
     <string name="btconnect_title">Bluetooth Connections</string>
+    <string name="battery_title">Battery</string>
     <string-array name="data_speed_vals">
         <item>50 Hz</item>
         <item>100 Hz</item>

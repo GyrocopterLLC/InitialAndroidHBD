@@ -21,7 +21,7 @@ import com.example.david.myapplication.R;
  * Use the {@link SettingsData#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsData extends Fragment {
+public class SettingsData extends BaseViewStubFragment {
 
     private OnFragmentInteractionListener mListener;
 
@@ -50,20 +50,27 @@ public class SettingsData extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_settings_data, container, false);
-
-        Spinner spinner = (Spinner) v.findViewById(R.id.data_speed_ram_spinner);
-// Create an ArrayAdapter using the string array and a default spinner layout
+    public void onCreateViewAfterViewStubInflated(View inflatedView, Bundle savedInstanceState) {
+        Spinner spinner = (Spinner) inflatedView.findViewById(R.id.data_speed_ram_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.data_speed_vals, android.R.layout.simple_spinner_item);
-// Specify the layout to use when the list of choices appears
+        R.array.data_speed_vals, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
+        // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
+    }
+
+    @Override
+    protected int getViewStubLayoutResource() {
+        return R.layout.fragment_settings_data;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater,container,savedInstanceState);
         return v;
     }
 

@@ -1,22 +1,30 @@
 package com.example.david.myapplication;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.david.myapplication.settingsFragments.OnFragmentInteractionListener;
 import com.example.david.myapplication.settingsFragments.SettingsData;
 import com.example.david.myapplication.settingsFragments.SettingsFOC;
 
+import java.util.ArrayList;
+
 public class SettingsActivity extends AppCompatActivity implements
         OnFragmentInteractionListener {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
 
         TabLayout tb = findViewById(R.id.settings_tabs);
         ViewPager vp = findViewById(R.id.view_pager);

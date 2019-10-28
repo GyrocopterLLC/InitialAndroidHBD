@@ -18,7 +18,7 @@ import com.example.david.myapplication.R;
  * Use the {@link SettingsUtil#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsUtil extends Fragment {
+public class SettingsUtil extends BaseViewStubFragment {
 
     private OnFragmentInteractionListener mListener;
 
@@ -47,11 +47,23 @@ public class SettingsUtil extends Fragment {
     }
 
     @Override
+    public void onCreateViewAfterViewStubInflated(View inflatedView, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    protected int getViewStubLayoutResource() {
+        return R.layout.fragment_settings_util;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_settings_util, container, false);
-        return v;
+
+        return super.onCreateView(inflater,container,savedInstanceState);
+//        View v = inflater.inflate(R.layout.fragment_settings_util, container, false);
+//        return v;
     }
 
     @Override

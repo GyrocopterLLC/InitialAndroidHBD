@@ -18,7 +18,7 @@ import com.example.david.myapplication.R;
  * Use the {@link SettingsFOC#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SettingsFOC extends Fragment {
+public class SettingsFOC extends BaseViewStubFragment {
 
     private OnFragmentInteractionListener mListener;
 
@@ -43,10 +43,21 @@ public class SettingsFOC extends Fragment {
     }
 
     @Override
+    public void onCreateViewAfterViewStubInflated(View inflatedView, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    protected int getViewStubLayoutResource() {
+        return R.layout.fragment_settings_foc;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings_foc, container, false);
+        return super.onCreateView(inflater, container, savedInstanceState);
+//        return inflater.inflate(R.layout.fragment_settings_foc, container, false);
 
 
     }

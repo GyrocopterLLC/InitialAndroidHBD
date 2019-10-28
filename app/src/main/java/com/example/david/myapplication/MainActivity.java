@@ -122,7 +122,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.action_settings:
                 Intent intent2 = new Intent(this, SettingsActivity.class);
+//                Intent intent2 = new Intent(this, ScrollingSettings.class);
                 startActivity(intent2);
+                break;
+            case R.id.action_battery:
+                Intent intent3 = new Intent(this, BatteryActivity.class);
+                startActivity(intent3);
                 break;
         }
         return true;
