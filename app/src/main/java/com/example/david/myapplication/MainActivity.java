@@ -26,10 +26,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MAIN_TAG = "DEBUG_LOG_MAIN_TAG";
-    public static final String BA_LIST = "com.example.david.myapplication.BA_LIST";
-    public static final String BA_MESSAGE = "com.example.david.myapplication.BA_MESSAGE";
-    public static final String SAVESTATE_KEY = "SAVESTATE_KEY";
-    public static final String SAVESPEED_KEY = "SAVESPEED_KEY";
+    public static final String BATTVOLTAGE_KEY = "com.example.david.myapplication.BATTVOLTAGE_KEY";
     public static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter BA;
     private Handler mHandler;
@@ -77,32 +74,24 @@ public class MainActivity extends AppCompatActivity {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
         }
 
-        // Check if BT adapter is disabled, and enable it.
+        // Check if BT adapter is disabled, and ask to enable it.
         BA = BluetoothAdapter.getDefaultAdapter();
-        Boolean alreadyStarted = false;
-        try {
-            alreadyStarted = savedInstanceState.getBoolean(SAVESTATE_KEY);
-        } catch (Exception e)
-        {
-            Log.d(MAIN_TAG, "Could not read from bundle.");
+
+        if(!BA.isEnabled()) {
+            Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(turnOn, REQUEST_ENABLE_BT);
+                }
+            }).show();
         }
-        if(!alreadyStarted) {
-            if(!BA.isEnabled()) {
-                Snackbar.make(findViewById(R.id.main_view), "Bluetooth is needed. Turn on?", Snackbar.LENGTH_LONG).setAction("TURN ON BLUETOOTH", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        startActivityForResult(turnOn, REQUEST_ENABLE_BT);
-                    }
-                }).show();
-            }
-        }
+
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(SAVESTATE_KEY, true);
-        outState.putFloat(SAVESPEED_KEY, mCurrentSpeed);
+//        outState.putBoolean(_KEY_, _value_);
         super.onSaveInstanceState(outState);
     }
 
@@ -121,12 +110,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.action_settings:
+                // Note - Bluetooth handler can be grabbed from global settings
+                // Don't need to pass it in
                 Intent intent2 = new Intent(this, SettingsActivity.class);
-//                Intent intent2 = new Intent(this, ScrollingSettings.class);
                 startActivity(intent2);
                 break;
             case R.id.action_battery:
                 Intent intent3 = new Intent(this, BatteryActivity.class);
+                // Pass in the initial voltage
+                intent3.putExtra(BATTVOLTAGE_KEY, mCurrentBatteryVolts);
                 startActivity(intent3);
                 break;
         }
@@ -177,29 +169,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                            String allTheInput = mReadBuffer.toString();
-                            if(allTheInput.endsWith("\r\n")) {
-                                if(allTheInput.startsWith("S:")) {
-                                    // Speed data coming in
-                                    mCurrentSpeed = getFloat(allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentSpeed);
-                                    mSpeedoView.setCurrentValue(mCurrentSpeed);
-                                }
-                                if(allTheInput.startsWith("T:")) {
-                                    mCurrentThrottle = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentThrottle);
-                                    mThrottleView.setThrottlePosition((int)mCurrentThrottle);
-                                }
-                                if(allTheInput.startsWith("P:")) {
-                                    mCurrentPhaseAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentPhaseAmps);
-                                    mPhaseView.setCurrentValue(mCurrentPhaseAmps);
-                                }
-                                if(allTheInput.startsWith("B:")) {
-                                    mCurrentBatteryAmps = getFloat (allTheInput.substring(2, allTheInput.indexOf("\r\n")),mCurrentBatteryAmps);
-                                    mBatteryView.setCurrentValue(mCurrentBatteryAmps);
-                                }
 
-                                Snackbar.make(findViewById(R.id.main_view), mReadBuffer.substring(0,mReadBuffer.indexOf("\r\n")), Snackbar.LENGTH_SHORT).show();
-                                mReadBuffer.delete(0, mReadBuffer.length());
-                            }
                             break;
                         case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
                             break;
@@ -220,6 +190,21 @@ public class MainActivity extends AppCompatActivity {
             new Thread(btReadWriteThread).start();
         } else {
             ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // If the Bluetooth thread is running, stop it
+        if(btReadWriteThread != null) {
+            if (btReadWriteThread.isRunning()) {
+                btReadWriteThread.stop();
+            }
+        }
+        if(mHandler != null) {
+            mHandler.removeCallbacks(sendAskPacket);
         }
     }
 
@@ -255,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
         mTimer.start();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
+//    @RequiresApi(api = Build.VERSION_CODES.P)
     public void askForData(View v) {
 //        PacketTools pkt = new PacketTools();
         if (((GlobalSettings) getApplication()).isConnected()) {

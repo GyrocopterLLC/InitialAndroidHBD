@@ -20,6 +20,8 @@ public class BTReadWriteThread implements Runnable{
     private DataOutputStream mmOutStream = null;
     private byte[] mBuffer;
     private Handler mHandler;
+    private boolean mIsRunning;
+    private boolean mQuitNow;
 
     // Hold on to the Thread context for safe keeping
     private Thread mCurrentThread;
@@ -35,6 +37,7 @@ public class BTReadWriteThread implements Runnable{
         mSocket = socket;
 
         mHandler = handler;
+        mIsRunning = false;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
@@ -62,8 +65,10 @@ public class BTReadWriteThread implements Runnable{
         int numBytes; // Number of bytes read
 
         mCurrentThread = Thread.currentThread();
+        mIsRunning = true;
+        mQuitNow = false;
 
-        while (true) { // Keep listening until exception
+        while (!mQuitNow) { // Keep listening until exception
             try {
                 numBytes = mmInStream.read(mBuffer);
                 StringBuffer newStringB = new StringBuffer(numBytes);
@@ -86,6 +91,17 @@ public class BTReadWriteThread implements Runnable{
                 break;
             }
         }
+
+        mIsRunning = false;
+    }
+
+    public void stop() {
+        // Quits execution of the started thread, if it was started.
+        mQuitNow = true; // Checked in the "run()" loop. If it's true, run() quits.
+    }
+
+    public boolean isRunning() {
+        return mIsRunning;
     }
 
     public void write(StringBuffer stringB) {

@@ -10,9 +10,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:text="TextView"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/btIconView"
@@ -26,6 +26,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:text="TextView"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintStart_toEndOf="@+id/btIconView"
         app:layout_constraintTop_toBottomOf="@+id/textViewName" />
 
