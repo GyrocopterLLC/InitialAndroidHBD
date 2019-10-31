@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class BatteryAdapter extends RecyclerView.Adapter<BatteryAdapter.BatteryViewHolder> {
+    private static BatteryClickListener clickListener;
     Float[] mVoltages;
     Integer[] mStatuses;
 
@@ -21,7 +22,8 @@ public class BatteryAdapter extends RecyclerView.Adapter<BatteryAdapter.BatteryV
             4.1f, // 90%
     };
 
-    public class BatteryViewHolder extends RecyclerView.ViewHolder {
+    public class BatteryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+
         // Each view contains a battery with icon and voltage
         public TextView mTitle;
         public TextView mVoltage;
@@ -29,6 +31,8 @@ public class BatteryAdapter extends RecyclerView.Adapter<BatteryAdapter.BatteryV
 
         public BatteryViewHolder(@NonNull View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
             this.mTitle = itemView.findViewById(R.id.battTitleText);
             this.mVoltage = itemView.findViewById(R.id.battVoltageText);
             this.mIcon = itemView.findViewById(R.id.battIconView);
@@ -55,8 +59,27 @@ public class BatteryAdapter extends RecyclerView.Adapter<BatteryAdapter.BatteryV
             mVoltage.setText(String.format("%.2f",newVoltage));
         }
 
+        @Override
+        public void onClick(View v) {
+            clickListener.onItemClick(getAdapterPosition(), v);
+        }
 
+        @Override
+        public boolean onLongClick(View v) {
+            clickListener.onItemLongClick(getAdapterPosition(), v);
+            return false;
+        }
     }
+
+    public void setClickListener(BatteryClickListener bcl) {
+        BatteryAdapter.clickListener = bcl;
+    }
+
+    public interface BatteryClickListener {
+        void onItemClick(int position, View v);
+        void onItemLongClick(int position, View v);
+    }
+
     public BatteryAdapter(Float[] voltages, Integer[] statuses) {
         mVoltages = voltages;
         mStatuses = statuses;

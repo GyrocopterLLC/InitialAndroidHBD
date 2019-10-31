@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Locale;
@@ -80,6 +81,18 @@ public class BatteryActivity extends AppCompatActivity {
 
         // specify the adapter
         mAdapter = new BatteryAdapter(mBatteryVoltages,mBatteryStatuses);
+        // choose what to do when clicked
+        ((BatteryAdapter)mAdapter).setClickListener(new BatteryAdapter.BatteryClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d clicked.",position), Snackbar.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onItemLongClick(int position, View v) {
+                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d long clicked.",position), Snackbar.LENGTH_SHORT).show();
+            }
+        });
         recyclerView.setAdapter(mAdapter);
         recyclerView.invalidate();
 
