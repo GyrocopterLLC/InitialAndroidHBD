@@ -4,23 +4,25 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Locale;
 
 public class GaugeClusterFragment extends BluetoothUserFragment {
+
+    private static final String FRAGMENT_KEY = "com.example.david.myapplication.GAUGECLUSTER";
     private StringBuffer mReadBuffer; // For saving incoming Bluetooth data
     public BluetoothUserFragmentInteractionListener mListener; // To be attached to the calling context
-
+    private Handler mHandler; // Passed down from activity
     private CountDownTimer mTimer; // For simulating the gauges
     private boolean mSpeedDir = false; // For changing direction during gauge simulation
+    private boolean mAskingForData = false; // For toggling data on/off
     // Saved Views for easy updating
     private GaugeView mSpeedoView, mPhaseView, mBatteryView;
     private ThrottleView mThrottleView;
@@ -33,6 +35,12 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     private float mCurrentFetTemp;
     private float mCurrentMotorTemp;
     private int mCurrentFaultCode;
+
+    @Override
+    public String GetFragmentID() {
+        return FRAGMENT_KEY;
+    }
+
     // Required empty constructer
     public GaugeClusterFragment() {}
 
@@ -49,6 +57,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mHandler = null;
     }
 
     @Override
@@ -93,10 +102,24 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
             ((TextView) getView().findViewById(R.id.text_btdevice_info)).setText("Connected to: " + ((GlobalSettings) getActivity().getApplication()).getDevice().getName());
             mReadBuffer = new StringBuffer(1024);
-            // TODO: Find a way to make a repetition timer. Callback into Main activity?
+            // Grab Handler from main - allows this fragment to set up recurring function calls
+            mHandler = mListener.getActivityHandler();
         } else {
             ((TextView) getView().findViewById(R.id.text_btdevice_info)).setText("Bluetooth not connected.");
         }
+    }
+
+    @Override
+    public void onPause() {
+        // If we have the Runnable posted to the handler, gotta remove it
+        if(mHandler != null) {
+            if(mAskingForData) {
+                mHandler.removeCallbacks(askDataRunnable);
+                mAskingForData = false;
+                ((Button) getView().findViewById(R.id.btn_askForData)).setText("ASK FOR DATA");
+            }
+        }
+        super.onPause();
     }
 
     @Override
@@ -155,8 +178,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
                 mSpeedoView.setCurrentValue(mCurrentSpeed);
                 mPhaseView.setCurrentValue(mPhaseView.getMaxValue()*(2.0f*mCurrentSpeed/30.0f - 1.0f));
                 mBatteryView.setCurrentValue(mBatteryView.getMaxValue()*(1.0f-2.0f*mCurrentSpeed/30.0f));
-                ThrottleView pb = (ThrottleView) findViewById(R.id.throttleBar);
-                pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
+                mThrottleView.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
             }
 
             @Override
@@ -167,8 +189,38 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         mTimer.start();
     }
 
+    public Runnable askDataRunnable = new Runnable() {
+        @Override
+        public void run() {
+            StringBuffer myBuf = PacketTools.Pack((char) 0x27, new char[0]);
+            if (((GlobalSettings) getActivity().getApplication()).isConnected()) {
+                mListener.Write(myBuf);
+            }
+
+            mHandler.postDelayed(this, 50);
+        }
+    };
+
     public void onClickAskForData() {
         // When the Ask for Data button is pressed, the Main activity should call this function
+        if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
+            if(!mAskingForData) {
+                // Send a timed event
+                if(mHandler != null) {
+                    mHandler.postDelayed(askDataRunnable, 50);
+                    mAskingForData = true;
+                    ((Button) getView().findViewById(R.id.btn_askForData)).setText("STOP");
+                }
+            } else {
+                // Stop the event
+                mHandler.removeCallbacks(askDataRunnable);
+                mAskingForData = false;
+                ((Button) getView().findViewById(R.id.btn_askForData)).setText("ASK FOR DATA");
+            }
+        } else {
+            // Popup telling user that it can't be done
+            Snackbar.make(getView().findViewById(R.id.gaugeLayout), "No connected device!", Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     @Override

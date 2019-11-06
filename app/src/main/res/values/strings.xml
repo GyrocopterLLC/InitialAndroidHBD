@@ -28,6 +28,7 @@
     <string name="settings_title">Settings</string>
     <string name="btconnect_title">Bluetooth Connections</string>
     <string name="battery_title">Battery</string>
+    <string name="action_gauge">Gauge</string>
     <string-array name="data_speed_vals">
         <item>50 Hz</item>
         <item>100 Hz</item>

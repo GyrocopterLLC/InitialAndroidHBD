@@ -1,5 +1,7 @@
 package com.example.david.myapplication;
 
+import android.os.Handler;
+
 /**
  * This interface must be implemented by activities that contain this
  * fragment to allow an interaction in this fragment to be communicated
@@ -17,5 +19,8 @@ package com.example.david.myapplication;
 public interface BluetoothUserFragmentInteractionListener {
 
     // Called when a fragment wants to write Bluetooth data
-    void onWrite(StringBuffer outData);
+    void Write(StringBuffer outData);
+
+    // Called to get the handler in main activity
+    Handler getActivityHandler();
 }

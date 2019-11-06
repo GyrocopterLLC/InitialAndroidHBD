@@ -5,6 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
     android:background="@color/app_background"
     android:id="@+id/gaugeLayout">
 
@@ -73,19 +77,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="511dp" />
-
-
-
-    <!--<ProgressBar-->
-    <!--android:id="@+id/phaseCurrentBar"-->
-    <!--style="@android:style/Widget.DeviceDefault.Light.ProgressBar"-->
-    <!--android:layout_width="100dp"-->
-    <!--android:layout_height="100dp"-->
-    <!--android:layout_marginStart="24dp"-->
-    <!--android:layout_marginLeft="24dp"-->
-    <!--android:layout_marginTop="24dp"-->
-    <!--app:layout_constraintStart_toStartOf="parent"-->
-    <!--app:layout_constraintTop_toBottomOf="@+id/text_throttle_label" />-->
 
 
     <android.support.constraint.ConstraintLayout
@@ -332,32 +323,33 @@
     </android.support.constraint.ConstraintLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btn_simulate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@color/colorAccent"
         android:onClick="onClickSimulate"
         android:text="Simulate"
         android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button3"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/btn_askForData"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/voltageLayout" />
+
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btn_askForData"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@color/colorAccent"
         android:onClick="onClickAskForData"
         android:text="Ask for Data"
         android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button" />
+        app:layout_constraintStart_toEndOf="@+id/btn_simulate"
+        app:layout_constraintTop_toBottomOf="@+id/voltageLayout" />
 
 </android.support.constraint.ConstraintLayout>

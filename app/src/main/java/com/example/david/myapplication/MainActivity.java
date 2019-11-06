@@ -10,6 +10,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -24,30 +28,15 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements BluetoothUserFragmentInteractionListener {
     public static final String MAIN_TAG = "DEBUG_LOG_MAIN_TAG";
-    public static final String BATTVOLTAGE_KEY = "com.example.david.myapplication.BATTVOLTAGE_KEY";
     public static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter BA;
     private Handler mHandler;
     private BluetoothSocket mSocket = null;
     public BTReadWriteThread btReadWriteThread;
-    private StringBuffer mReadBuffer;
-    private CountDownTimer mTimer;
-    private boolean mSpeedDir = false;
-
-    GaugeView mSpeedoView, mPhaseView, mBatteryView;
-    ThrottleView mThrottleView;
-    float mCurrentSpeed;
-    float mCurrentThrottle;
-    float mCurrentPhaseAmps;
-    float mCurrentBatteryAmps;
-    float mCurrentBatteryVolts;
-    float mCurrentFetTemp;
-    float mCurrentMotorTemp;
-    int mCurrentFaultCode;
-
-    private boolean askingForData = false;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,21 +47,25 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-        // Setup speedometer
-        mSpeedoView = (GaugeView) findViewById(R.id.speedometer);
-        mThrottleView = (ThrottleView) findViewById(R.id.throttleBar);
-        mPhaseView = (GaugeView) findViewById(R.id.phaseCurrentBar);
-        mBatteryView = (GaugeView) findViewById(R.id.batteryCurrentBar);
-        mCurrentSpeed = 0;
-        mCurrentThrottle = 0;
-        mCurrentBatteryAmps = 0;
-        mCurrentPhaseAmps = 0;
 
-        if(((GlobalSettings)getApplication()).isConnected()){
-            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to :"+((GlobalSettings)getApplication()).getDevice().getName());
-        } else {
-            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
-        }
+        // Load default fragment
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.frameLayout, GaugeClusterFragment.newInstance());
+        ft.commit();
+
+        // Set up a back stack changed listener
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                // What's my current fragment?
+                if(getActiveFragment() instanceof GaugeClusterFragment) {
+                    menuSetupForGauge();
+                }
+                if(getActiveFragment() instanceof BatteryFragment) {
+                    menuSetupForBattery();
+                }
+            }
+        });
 
         // Check if BT adapter is disabled, and ask to enable it.
         BA = BluetoothAdapter.getDefaultAdapter();
@@ -86,7 +79,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }).show();
         }
+    }
 
+    private void menuSetupForGauge() {
+        mMenu.findItem(R.id.action_battery).setVisible(true);
+        mMenu.findItem(R.id.action_connect).setVisible(true);
+        mMenu.findItem(R.id.action_settings).setVisible(true);
+        mMenu.findItem(R.id.action_gauge).setVisible(false);
+    }
+
+    private void menuSetupForBattery() {
+        mMenu.findItem(R.id.action_battery).setVisible(false);
+        mMenu.findItem(R.id.action_connect).setVisible(true);
+        mMenu.findItem(R.id.action_settings).setVisible(true);
+        mMenu.findItem(R.id.action_gauge).setVisible(true);
     }
 
     @Override
@@ -97,29 +103,46 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_toolbar,menu);
+        menuSetupForGauge();
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        FragmentTransaction ft;
+        Intent intent;
         switch(item.getItemId()) {
             case R.id.action_connect:
-                Intent intent = new Intent(this, BTConnectActivity.class);
+                intent = new Intent(this, BTConnectActivity.class);
                 startActivity(intent);
                 break;
             case R.id.action_settings:
                 // Note - Bluetooth handler can be grabbed from global settings
                 // Don't need to pass it in
-                Intent intent2 = new Intent(this, SettingsActivity.class);
-                startActivity(intent2);
+                intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
             case R.id.action_battery:
-                Intent intent3 = new Intent(this, BatteryActivity.class);
-                // Pass in the initial voltage
-                intent3.putExtra(BATTVOLTAGE_KEY, mCurrentBatteryVolts);
-                startActivity(intent3);
+                // Change menu items
+                menuSetupForBattery();
+                // Swap fragment
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.frameLayout, BatteryFragment.newInstance());
+                ft.addToBackStack(null);
+                ft.commit();
+                break;
+            case R.id.action_gauge:
+                // Change menu items
+                menuSetupForGauge();
+                // Swap fragment
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.frameLayout, GaugeClusterFragment.newInstance());
+                ft.addToBackStack(null);
+                ft.commit();
                 break;
         }
         return true;
@@ -128,148 +151,94 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+
         if(((GlobalSettings)getApplication()).isConnected()){
-            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Connected to: "+((GlobalSettings)getApplication()).getDevice().getName());
-            mReadBuffer = new StringBuffer(1024);
             mSocket = ((GlobalSettings)getApplication()).getSocket();
             // Create new handler for messaging the BT device
-            mHandler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case BTReadWriteThread.MessageConstants.MESSAGE_READ:
-                            mReadBuffer.append(msg.obj);
-                            // Check if a valid packet has arrived
-                            Packet pkt = PacketTools.Unpack(mReadBuffer);
-                            if(pkt.SOPposition == -1) {
-                                // No SOPs were found. Delete all of it.
-                                mReadBuffer.delete(0, mReadBuffer.length());
-                            } else {
-                                if(pkt.PacketLength > 0) {
-                                    // Good packet!
-                                    mReadBuffer.delete(0,pkt.SOPposition+pkt.PacketLength);
-                                    if(pkt.PacketID == (char)0xA7) {
-                                        // This is our dashboard data response
-
-                                        mCurrentThrottle = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
-                                        mCurrentSpeed = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(4,8)));
-                                        mCurrentPhaseAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(8,12)));
-                                        mCurrentBatteryAmps = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(12,16)));
-                                        mCurrentBatteryVolts = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(16,20)));
-                                        mCurrentFetTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(20,24)));
-                                        mCurrentMotorTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(24,28)));
-                                        mCurrentFaultCode = PacketTools.stringToInt(new StringBuffer(pkt.Data.substring(28,32)));
-                                        mSpeedoView.setCurrentValue(mCurrentSpeed);
-                                        mThrottleView.setThrottlePosition((int)mCurrentThrottle);
-                                        mPhaseView.setCurrentValue(mCurrentPhaseAmps);
-                                        mBatteryView.setCurrentValue(mCurrentBatteryAmps);
-                                        ((TextView)findViewById(R.id.batteryVoltageDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentBatteryVolts));
-                                        ((TextView)findViewById(R.id.fetTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentFetTemp));
-                                        ((TextView)findViewById(R.id.motorTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentMotorTemp));
-                                    }
-                                }
-                            }
-
-                            break;
-                        case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
-                            break;
-                        case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
-                            break;
-                        case BTReadWriteThread.MessageConstants.MESSAGE_DISCONNECTED:
-                            Snackbar.make(findViewById(R.id.main_view), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
-                            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
-                            ((GlobalSettings)getApplication()).setConnected(false);
-                            ((GlobalSettings)getApplication()).setDevice(null);
-                            ((GlobalSettings)getApplication()).setSocket(null);
-                            break;
-                    }
-                }
-            };
+            mHandler = new Handler(getMainLooper(), new MainCallback());
             // Start the BT read-write thread
             btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
             new Thread(btReadWriteThread).start();
-        } else {
-            ((TextView)findViewById(R.id.text_btdevice_info)).setText("Not connected");
+        }
+    }
+
+    @Override
+    public void Write(StringBuffer outData) {
+        if(((GlobalSettings)getApplication()).isConnected()){
+            if(btReadWriteThread != null) {
+                btReadWriteThread.write(outData);
+            }
+        }
+    }
+
+    @Override
+    public Handler getActivityHandler() {
+        return mHandler;
+    }
+
+    private BluetoothUserFragment getActiveFragment() {
+        return (BluetoothUserFragment) getSupportFragmentManager().findFragmentById(R.id.frameLayout);
+    }
+
+    public class MainCallback implements Handler.Callback {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case BTReadWriteThread.MessageConstants.MESSAGE_READ:
+                    // Call the fragment's read function
+                    getActiveFragment().ReceiveDataCallback((StringBuffer)msg.obj);
+                    break;
+                case BTReadWriteThread.MessageConstants.MESSAGE_WRITE:
+                    break;
+                case BTReadWriteThread.MessageConstants.MESSAGE_ERROR:
+                    // Call the fragment's error function
+                    getActiveFragment().ErrorCallback();
+                    break;
+                case BTReadWriteThread.MessageConstants.MESSAGE_DISCONNECTED:
+                    ((GlobalSettings)getApplication()).setConnected(false);
+                    ((GlobalSettings)getApplication()).setDevice(null);
+                    ((GlobalSettings)getApplication()).setSocket(null);
+                    // Call the fragment's disconnected function
+                    getActiveFragment().DisconnectCallback();
+                    break;
+            }
+            return true; // No further handling required.
         }
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
 
         // If the Bluetooth thread is running, stop it
         if(btReadWriteThread != null) {
             if (btReadWriteThread.isRunning()) {
                 btReadWriteThread.stop();
             }
+            btReadWriteThread = null;
         }
+
         if(mHandler != null) {
-            mHandler.removeCallbacks(sendAskPacket);
+            // Remove handlers and callbacks
+            mHandler = null;
+        }
+
+        super.onPause();
+    }
+
+    public void onClickSimulate(View v) {
+        // Should only be called when gaugecluster fragment is active
+        if(getActiveFragment() instanceof GaugeClusterFragment) {
+            ((GaugeClusterFragment)getActiveFragment()).onClickSimulate();
         }
     }
 
-    public void onClick(View v) {
-        mTimer = new CountDownTimer(5000, 50) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if(mSpeedDir) {
-                    if (mCurrentSpeed < 30.0f) {
-                        mCurrentSpeed += 1.0f;
-                    } else {
-                        mSpeedDir = false;
-                    }
-                } else {
-                    if(mCurrentSpeed > 0.0f) {
-                        mCurrentSpeed -= 1.0f;
-                    } else {
-                        mSpeedDir = true;
-                    }
-                }
-                mSpeedoView.setCurrentValue(mCurrentSpeed);
-                mPhaseView.setCurrentValue(mPhaseView.getMaxValue()*(2.0f*mCurrentSpeed/30.0f - 1.0f));
-                mBatteryView.setCurrentValue(mBatteryView.getMaxValue()*(1.0f-2.0f*mCurrentSpeed/30.0f));
-                ThrottleView pb = (ThrottleView) findViewById(R.id.throttleBar);
-                pb.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
-            }
-
-            @Override
-            public void onFinish() {
-                // Nothing nada zilch
-            }
-        };
-        mTimer.start();
-    }
-
-//    @RequiresApi(api = Build.VERSION_CODES.P)
-    public void askForData(View v) {
-//        PacketTools pkt = new PacketTools();
-        if (((GlobalSettings) getApplication()).isConnected()) {
-            if (!askingForData) {
-                // Start a timed event
-                mHandler.postDelayed(sendAskPacket, 50);
-                askingForData = true;
-                ((Button) v).setText("STOP");
-            } else {
-                mHandler.removeCallbacks(sendAskPacket);
-                askingForData = false;
-                ((Button) v).setText("ASK FOR DATA");
-            }
-        } else {
-            Snackbar.make(findViewById(R.id.main_view), "No connected device!", Snackbar.LENGTH_SHORT).show();
+    public void onClickAskForData(View v) {
+        // Should only be called when gaugecluster fragment is active
+        if(getActiveFragment() instanceof GaugeClusterFragment) {
+            ((GaugeClusterFragment)getActiveFragment()).onClickAskForData();
         }
     }
-
-    Runnable sendAskPacket = new Runnable() {
-        @Override
-        public void run() {
-            StringBuffer myBuf = PacketTools.Pack((char) 0x27, new char[0]);
-            if (((GlobalSettings) getApplication()).isConnected()) {
-                btReadWriteThread.write(myBuf);
-            }
-
-            mHandler.postDelayed(this, 50);
-        }
-    };
 
     @Override
     protected void onDestroy() {
@@ -282,17 +251,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         super.onDestroy();
-    }
-
-    public float getFloat(String toFloat, float deflt) {
-        float out;
-        try {
-            out = Float.parseFloat(toFloat);
-        } catch (NumberFormatException e) {
-            out = deflt;
-            Log.d(MAIN_TAG, "Could not parse float: "+toFloat);
-        }
-        return out;
     }
 
 

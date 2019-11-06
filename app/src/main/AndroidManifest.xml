@@ -11,8 +11,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:supportsRtl="true">
         <activity android:name=".MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
@@ -28,7 +28,7 @@
         <activity android:name=".SettingsActivity"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"></activity>
-        <activity android:name=".BatteryActivity"
+        <activity android:name=".BatteryFragment"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"></activity>
     </application>

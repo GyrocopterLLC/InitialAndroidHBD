@@ -72,13 +72,14 @@ public class BTReadWriteThread implements Runnable{
             try {
                 numBytes = mmInStream.read(mBuffer);
                 StringBuffer newStringB = new StringBuffer(numBytes);
-                for(int i = 0; i < numBytes; i++) {
-                    newStringB.append((char)(((char)mBuffer[i])&0xFF));
+                for (int i = 0; i < numBytes; i++) {
+                    newStringB.append((char) (((char) mBuffer[i]) & 0xFF));
                 }
 
                 Message readMsg = mHandler.obtainMessage(MessageConstants.MESSAGE_READ, numBytes,
                         -1, newStringB);
                 readMsg.sendToTarget();
+
             } catch (IOException e) {
                 Log.e(TAG, "Error occurred while reading data. Input stream maybe disconnected.", e);
                 try {
