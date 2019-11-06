@@ -85,12 +85,12 @@ public class BatteryActivity extends AppCompatActivity {
         ((BatteryAdapter)mAdapter).setClickListener(new BatteryAdapter.BatteryClickListener() {
             @Override
             public void onItemClick(int position, View v) {
-                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d clicked.",position), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d clicked.",position+1), Snackbar.LENGTH_SHORT).show();
             }
 
             @Override
             public void onItemLongClick(int position, View v) {
-                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d long clicked.",position), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(R.id.batteryView), String.format("Battery %d long clicked.",position+1), Snackbar.LENGTH_SHORT).show();
             }
         });
         recyclerView.setAdapter(mAdapter);

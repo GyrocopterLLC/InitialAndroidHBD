@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 
 import com.example.david.myapplication.R;
@@ -16,14 +15,14 @@ import com.example.david.myapplication.R;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link SettingsFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link SettingsData#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class SettingsData extends BaseViewStubFragment {
 
-    private OnFragmentInteractionListener mListener;
+    private SettingsFragmentInteractionListener mListener;
 
     public SettingsData() {
         // Required empty public constructor
@@ -77,11 +76,11 @@ public class SettingsData extends BaseViewStubFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof SettingsFragmentInteractionListener) {
+            mListener = (SettingsFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement SettingsFragmentInteractionListener");
         }
     }
 

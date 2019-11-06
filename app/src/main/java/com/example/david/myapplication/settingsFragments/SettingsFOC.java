@@ -1,7 +1,6 @@
 package com.example.david.myapplication.settingsFragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,14 +12,14 @@ import com.example.david.myapplication.R;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link SettingsFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link SettingsFOC#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class SettingsFOC extends BaseViewStubFragment {
 
-    private OnFragmentInteractionListener mListener;
+    private SettingsFragmentInteractionListener mListener;
 
     public SettingsFOC() {
         // Required empty public constructor
@@ -65,11 +64,11 @@ public class SettingsFOC extends BaseViewStubFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof SettingsFragmentInteractionListener) {
+            mListener = (SettingsFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement SettingsFragmentInteractionListener");
         }
     }
 

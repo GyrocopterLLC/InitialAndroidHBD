@@ -10,7 +10,7 @@ package com.example.david.myapplication.settingsFragments;
  * "http://developer.android.com/training/basics/fragments/communicating.html"
  * >Communicating with Other Fragments</a> for more information.
  */
-public interface OnFragmentInteractionListener {
+public interface SettingsFragmentInteractionListener {
 
     void onFragmentInteraction();
 }

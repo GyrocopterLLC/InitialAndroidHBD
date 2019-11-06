@@ -67,7 +67,7 @@ public class BatteryAdapter extends RecyclerView.Adapter<BatteryAdapter.BatteryV
         @Override
         public boolean onLongClick(View v) {
             clickListener.onItemLongClick(getAdapterPosition(), v);
-            return false;
+            return true;
         }
     }
 
