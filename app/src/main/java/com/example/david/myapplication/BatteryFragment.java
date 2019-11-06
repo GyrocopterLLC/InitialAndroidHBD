@@ -36,6 +36,7 @@ public class BatteryFragment extends BluetoothUserFragment {
     private Float[] mBatteryVoltages;
     private Integer[] mBatteryStatuses;
     private int mNumBatteries;
+    private int mCurrentBattery;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -185,11 +186,27 @@ public class BatteryFragment extends BluetoothUserFragment {
                                 resizeBatteryArrays(newNumBatteries);
                             }
                             mBMSstate = BMS_State.GET_BATTERY_VOLTAGES;
+                            mCurrentBattery = 0;
+                            // TODO: Change following line if need more than 256 batteries.
+                            char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
+                            StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+                            mListener.Write(myBuf);
                         }
                     } else if (mBMSstate == BMS_State.GET_BATTERY_VOLTAGES) {
-                        // Do the next thing
+                        float new_volts = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
+                        ((BatteryAdapter)mAdapter).setBattery(new_volts, mCurrentBattery);
+                        mCurrentBattery++;
+                        if(mCurrentBattery < mNumBatteries) {
+                            // TODO: Change following line if need more than 256 batteries.
+                            char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
+                            StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+                            mListener.Write(myBuf);
+                        } else {
+                            mBMSstate = BMS_State.DONE;
+                        }
+
                     } else if (mBMSstate == BMS_State.DONE) {
-                        // Don't do no thing
+                        // Don't do anything
                     }
 
                 } else {
