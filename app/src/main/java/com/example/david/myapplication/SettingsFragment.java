@@ -193,9 +193,10 @@ public class SettingsFragment extends BluetoothUserFragment {
         layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        mSettingsNames = new String[] {"None1","None2"};
-        mSettingsValues = new Float[] {0.0f,0.0f};
-        mSettingsFormats = new Integer[] {SettingsAdapter.SettingsTypes.TYPE_FLOAT,SettingsAdapter.SettingsTypes.TYPE_FLOAT};
+        mSettingsNames = adcNames;
+        mSettingsValues = new Float[mSettingsNames.length];
+        for(int i = 0; i < mSettingsValues.length; i++) {mSettingsValues[i] = 0.0f;}
+        mSettingsFormats = adcFormats;
         // specify the adapter
         mAdapter = new SettingsAdapter(mSettingsNames, mSettingsValues, mSettingsFormats);
 
