@@ -29,6 +29,10 @@
     <string name="btconnect_title">Bluetooth Connections</string>
     <string name="battery_title">Battery</string>
     <string name="action_gauge">Gauge</string>
+    <string name="dflt_textview">TextView</string>
+    <string name="controller_temp">Controller Temp</string>
+    <string name="motor_temp">Motor Temp</string>
+    <string name="battery_voltage">Battery Voltage</string>
     <string-array name="data_speed_vals">
         <item>50 Hz</item>
         <item>100 Hz</item>

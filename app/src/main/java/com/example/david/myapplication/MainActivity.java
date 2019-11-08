@@ -95,6 +95,13 @@ public class MainActivity extends AppCompatActivity
         mMenu.findItem(R.id.action_gauge).setVisible(true);
     }
 
+    private void menuSetupForSettings() {
+        mMenu.findItem(R.id.action_battery).setVisible(true);
+        mMenu.findItem(R.id.action_connect).setVisible(true);
+        mMenu.findItem(R.id.action_settings).setVisible(false);
+        mMenu.findItem(R.id.action_gauge).setVisible(true);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 //        outState.putBoolean(_KEY_, _value_);
@@ -121,10 +128,13 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
                 break;
             case R.id.action_settings:
-                // Note - Bluetooth handler can be grabbed from global settings
-                // Don't need to pass it in
-                intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                // Change menu items
+                menuSetupForSettings();
+                // Swap fragment
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.frameLayout, SettingsFragment.newInstance());
+                ft.addToBackStack(null);
+                ft.commit();
                 break;
             case R.id.action_battery:
                 // Change menu items
