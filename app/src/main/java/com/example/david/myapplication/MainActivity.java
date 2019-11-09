@@ -191,6 +191,7 @@ public class MainActivity extends AppCompatActivity
         return (BluetoothUserFragment) getSupportFragmentManager().findFragmentById(R.id.frameLayout);
     }
 
+
     public class MainCallback implements Handler.Callback {
         @Override
         public boolean handleMessage(Message msg) {
@@ -247,6 +248,14 @@ public class MainActivity extends AppCompatActivity
         // Should only be called when gaugecluster fragment is active
         if(getActiveFragment() instanceof GaugeClusterFragment) {
             ((GaugeClusterFragment)getActiveFragment()).onClickAskForData();
+        }
+    }
+
+
+    public void onClickSettingsRead(View view) {
+        // Should only be called when settings fragment is active
+        if(getActiveFragment() instanceof SettingsFragment) {
+            ((SettingsFragment)getActiveFragment()).onClickRead();
         }
     }
 

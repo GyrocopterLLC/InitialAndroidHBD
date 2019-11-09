@@ -37,10 +37,25 @@ public class PacketTools {
     }
 
     public static int stringToInt(StringBuffer in_string) {
-        int out_int = 0;
-        for(int i = 0; i<4; i++) {
-            out_int += ((byte)(in_string.charAt(i))) << (8*i);
-        }
+        long out_int;
+        out_int = in_string.charAt(0) * (16777216L);
+        out_int += in_string.charAt(1) * (65536L);
+        out_int += in_string.charAt(2) * (256L);
+        out_int += in_string.charAt(3);
+
+        return (int)out_int;
+    }
+
+    public static int stringTo16bitInt(StringBuffer in_string) {
+        int out_int;
+        out_int = in_string.charAt(0) * (256);
+        out_int += in_string.charAt(1);
+        return out_int;
+    }
+
+    public static int stringTo8bitInt(StringBuffer in_string) {
+        int out_int;
+        out_int = in_string.charAt(0);
         return out_int;
     }
 

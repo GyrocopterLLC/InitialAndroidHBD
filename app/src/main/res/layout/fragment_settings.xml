@@ -58,12 +58,13 @@
         android:id="@+id/btnSettingsRead"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:onClick="onClickSettingsRead"
         android:text="Read"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSettingsWrite"
-        app:layout_constraintStart_toStartOf="parent"></Button>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnSettingsWrite"
@@ -74,7 +75,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSettingsRead"></Button>
+        app:layout_constraintStart_toEndOf="@+id/btnSettingsRead"/>
 
 
 </android.support.constraint.ConstraintLayout>
