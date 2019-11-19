@@ -1,17 +1,21 @@
 package com.example.david.myapplication;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import static com.example.david.myapplication.SettingsConstants.adcFormats;
@@ -39,10 +43,12 @@ public class SettingsFragment extends BluetoothUserFragment {
     private static final int MODE_EEPROM = 1;
     private String[] mSettingsNames;
     private Float[] mSettingsValues;
+    private Float[] mEditedValues;
     private Integer[] mSettingsFormats;
     private Integer[] mSettingsIDs;
     private int mRamOrEeprom = MODE_RAM;
     private int mVarNum;
+    private int mEditVarNum;
 
     @Override
     public String GetFragmentID() {
@@ -110,6 +116,8 @@ public class SettingsFragment extends BluetoothUserFragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Pull handler from main activity
+        mHandler = mListener.getActivityHandler();
 
         // Set up the tabs
         TabLayout tb_categories = getActivity().findViewById(R.id.settings_category_tabs);
@@ -169,10 +177,12 @@ public class SettingsFragment extends BluetoothUserFragment {
                         break;
                 }
                 mSettingsValues = new Float[mSettingsNames.length];
+                mEditedValues = new Float[mSettingsNames.length];
                 for(int i = 0; i < mSettingsValues.length; i++) {
                     mSettingsValues[i] = 0.0f;
+                    mEditedValues[i] = 0.0f;
                 }
-                mAdapter = new SettingsAdapter(mSettingsNames, mSettingsValues, mSettingsFormats);
+                mAdapter = new SettingsAdapter(mSettingsNames, mSettingsValues, mSettingsFormats, mHandler);
                 ((SettingsAdapter)mAdapter).setClickListener(mClickListener);
                 recyclerView.setAdapter(mAdapter);
                 recyclerView.invalidate();
@@ -221,11 +231,15 @@ public class SettingsFragment extends BluetoothUserFragment {
 
         mSettingsNames = adcNames;
         mSettingsValues = new Float[mSettingsNames.length];
-        for(int i = 0; i < mSettingsValues.length; i++) {mSettingsValues[i] = 0.0f;}
+        mEditedValues = new Float[mSettingsNames.length];
+        for(int i = 0; i < mSettingsValues.length; i++) {
+            mSettingsValues[i] = 0.0f;
+            mEditedValues[i] = 0.0f;
+        }
         mSettingsFormats = adcFormats;
         mSettingsIDs = adcIDs;
                 // specify the adapter
-        mAdapter = new SettingsAdapter(mSettingsNames, mSettingsValues, mSettingsFormats);
+        mAdapter = new SettingsAdapter(mSettingsNames, mSettingsValues, mSettingsFormats, mHandler);
 
         // choose what to do when clicked
         ((SettingsAdapter)mAdapter).setClickListener(mClickListener);
@@ -236,8 +250,7 @@ public class SettingsFragment extends BluetoothUserFragment {
         if(((GlobalSettings)getActivity().getApplication()).isConnected()){
             ((TextView)getActivity().findViewById(R.id.settingsBTstatusText)).setText("Connected to: "+((GlobalSettings)getActivity().getApplication()).getDevice().getName());
             mReadBuffer = new StringBuffer(1024);
-            // Pull handler from main activity
-            mHandler = mListener.getActivityHandler();
+
 
         } else {
             ((TextView)getActivity().findViewById(R.id.settingsBTstatusText)).setText("Not connected");
@@ -247,12 +260,62 @@ public class SettingsFragment extends BluetoothUserFragment {
     SettingsAdapter.SettingsClickListener mClickListener = new SettingsAdapter.SettingsClickListener() {
         @Override
         public void onItemClick(int position, View v) {
-            Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("Setting %d clicked.",position+1), Snackbar.LENGTH_SHORT).show();
+            // Edit value popup
+            AlertDialog.Builder popupValueChanger = new AlertDialog.Builder(getActivity());
+            popupValueChanger.setTitle("New Value");
+            popupValueChanger.setMessage("Enter a new value");
+            mEditVarNum = position;
+            final EditText input = new EditText(getActivity());
+
+            if(mSettingsFormats[position] == SettingsAdapter.SettingsTypes.TYPE_FLOAT) {
+                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                input.setText(String.format("%.3f",mSettingsValues[position]));
+            } else {
+                input.setText(String.format("%d",mSettingsValues[position].intValue()));
+                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+            }
+            popupValueChanger.setView(input);
+            popupValueChanger.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Set the new value
+                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("New value is %s",input.getText()), Snackbar.LENGTH_SHORT).show();
+                    mEditedValues[mEditVarNum] = Float.parseFloat(input.getText().toString());
+                    ((SettingsAdapter)mAdapter).setNewValue(mEditedValues[mEditVarNum],mEditVarNum,true);
+
+                }
+            });
+            popupValueChanger.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), "Canceled.", Snackbar.LENGTH_SHORT).show();
+                }
+            });
+            popupValueChanger.show();
         }
 
         @Override
         public void onItemLongClick(int position, View v) {
-            Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("Setting %d long clicked.",position+1), Snackbar.LENGTH_SHORT).show();
+            // Ask to reset the value.
+            mEditVarNum = position;
+            AlertDialog.Builder popupValueResetter = new AlertDialog.Builder(getActivity());
+            popupValueResetter.setTitle("Reset Value");
+            popupValueResetter.setMessage("Reset value back to original?");
+            popupValueResetter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("%s reset.",mSettingsNames[mEditVarNum]),Snackbar.LENGTH_SHORT).show();
+                    mEditedValues[mEditVarNum] = 0.0f;
+                    ((SettingsAdapter)mAdapter).setNewValue(mSettingsValues[mEditVarNum],mEditVarNum,false);
+                }
+            });
+            popupValueResetter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Canceled.",Snackbar.LENGTH_SHORT).show();
+                        }
+                    });
+            popupValueResetter.show();
         }
     };
 
@@ -268,7 +331,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             if (pkt.PacketLength > 0) {
                 // Good packet!
                 mReadBuffer.delete(0, pkt.SOPposition + pkt.PacketLength);
-                if (pkt.PacketID == (char) 0x81 || pkt.PacketID == (char) 0x82) {
+                if (pkt.PacketID == PacketTools.GET_RAM_RESULT || pkt.PacketID == PacketTools.GET_EEPROM_RESULT) {
                     // Packet is get ram or get EEPROM data response
                     // Update the variable value
                     if(mSettingsFormats[mVarNum] == SettingsAdapter.SettingsTypes.TYPE_8BIT) {
@@ -284,7 +347,7 @@ public class SettingsFragment extends BluetoothUserFragment {
                         mSettingsValues[mVarNum] = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
                     }
                     // Update the display
-                    ((SettingsAdapter)mAdapter).setNewValue(mSettingsValues[mVarNum],mVarNum);
+                    ((SettingsAdapter)mAdapter).setNewValue(mSettingsValues[mVarNum],mVarNum,false);
                     mVarNum++;
                     // Get the next if there are more
                     if(mVarNum < mSettingsNames.length) {
@@ -292,17 +355,48 @@ public class SettingsFragment extends BluetoothUserFragment {
                         char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF)};
                         StringBuffer myBuf;
                         if(mRamOrEeprom == MODE_RAM) {
-                            myBuf = PacketTools.Pack((char) 0x01, packet_data); // Get RAM
+                            myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data); // Get RAM
                         } else {
-                            myBuf = PacketTools.Pack((char) 0x02, packet_data); // Get EEPROM
+                            myBuf = PacketTools.Pack(PacketTools.GET_EEPROM_VARIABLE, packet_data); // Get EEPROM
                         }
                         mListener.Write(myBuf);
                     }
 
-                } else if(pkt.PacketID == (char) 0x91) {
+                } else if(pkt.PacketID == PacketTools.CONTROLLER_ACK) {
                     // Ack packet. New data sent successfully.
+                    // Find the next changed value
+                    int i = mVarNum;
+                    mVarNum = -1;
+                    for(; (i < mSettingsNames.length) && (mVarNum == -1); i++) {
+                        if(((SettingsAdapter)mAdapter).mChanged[i]) {
+                            mVarNum = i;
+                        }
+                    }
+                    if(mVarNum != -1) {
+                        StringBuffer packet_data = new StringBuffer(6);
+                        int this_var_id = mSettingsIDs[mVarNum];
+                        int this_var_fmt = mSettingsFormats[mVarNum];
+                        // First two bytes - data ID
+                        packet_data.append((char)((this_var_id & 0xFF00) >> 8));
+                        packet_data.append((char)(this_var_id & 0x00FF));
+                        // Next 1 to 4 bytes - data value
+                        if(this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_8BIT) {
+                            packet_data.append((char) ((SettingsAdapter)mAdapter).mValues[mVarNum].intValue());
+                        } else if(this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_16BIT) {
+                            packet_data.append(PacketTools.int16toString(((SettingsAdapter)mAdapter).mValues[mVarNum].intValue()));
+                        } else if(this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_32BIT) {
+                            packet_data.append(PacketTools.int32toString(((SettingsAdapter)mAdapter).mValues[mVarNum].intValue()));
+                        } else if(this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_FLOAT) {
+                            packet_data.append(PacketTools.floatToString(((SettingsAdapter)mAdapter).mValues[mVarNum]));
+                        }
+                        if(mRamOrEeprom == MODE_RAM) {
+                            mListener.Write(PacketTools.Pack(PacketTools.SET_RAM_VARIABLE, packet_data.toString().toCharArray()));
+                        } else {
+                            mListener.Write(PacketTools.Pack(PacketTools.SET_EEPROM_VARIABLE, packet_data.toString().toCharArray()));
+                        }
+                    }
 
-                } else if (pkt.PacketID == (char) 0x92) {
+                } else if (pkt.PacketID == PacketTools.CONTROLLER_NACK) {
                     // Nack packet. Something screwed up.
 
                 } else {
@@ -319,11 +413,49 @@ public class SettingsFragment extends BluetoothUserFragment {
         char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF)};
         StringBuffer myBuf;
         if(mRamOrEeprom == MODE_RAM) {
-            myBuf = PacketTools.Pack((char)0x01, packet_data);
+            myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
         } else {
-            myBuf = PacketTools.Pack((char)0x02, packet_data);
+            myBuf = PacketTools.Pack(PacketTools.GET_EEPROM_VARIABLE, packet_data);
         }
         mListener.Write(myBuf);
+    }
+
+    private void sendData() {
+        mVarNum = -1; // Invalid entry - for error checking below
+        StringBuffer packet_data = new StringBuffer(6);
+        // Find the first setting that is changed
+        for(int i = 0; (i < mSettingsNames.length) && (mVarNum == -1); i++) {
+            if(((SettingsAdapter)mAdapter).mChanged[i]) {
+                // This one is changed. Needs to be sent.
+                mVarNum = i;
+            }
+        }
+        if(mVarNum != -1) {
+            int this_var_id = mSettingsIDs[mVarNum];
+            int this_var_fmt = mSettingsFormats[mVarNum];
+            // First two bytes - data ID
+            packet_data.append((char) ((this_var_id & 0xFF00) >> 8));
+            packet_data.append((char) (this_var_id & 0x00FF));
+            // Next 1 to 4 bytes - data value
+            if (this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_8BIT) {
+                packet_data.append((char) ((SettingsAdapter) mAdapter).mValues[mVarNum].intValue());
+            } else if (this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_16BIT) {
+                packet_data.append(PacketTools.int16toString(((SettingsAdapter) mAdapter).mValues[mVarNum].intValue()));
+            } else if (this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_32BIT) {
+                packet_data.append(PacketTools.int32toString(((SettingsAdapter) mAdapter).mValues[mVarNum].intValue()));
+            } else if (this_var_fmt == SettingsAdapter.SettingsTypes.TYPE_FLOAT) {
+                packet_data.append(PacketTools.floatToString(((SettingsAdapter) mAdapter).mValues[mVarNum]));
+            }
+            if (mRamOrEeprom == MODE_RAM) {
+                mListener.Write(PacketTools.Pack(PacketTools.SET_RAM_VARIABLE, packet_data.toString().toCharArray()));
+            } else {
+                mListener.Write(PacketTools.Pack(PacketTools.SET_EEPROM_VARIABLE, packet_data.toString().toCharArray()));
+            }
+        } else {
+            // Notify user that nothing is changed, so nothing will be sent
+            Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"No changes.",Snackbar.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
@@ -341,6 +473,16 @@ public class SettingsFragment extends BluetoothUserFragment {
         // Start the read process if we are connected
         if(((GlobalSettings)getActivity().getApplication()).isConnected()){
             refreshData();
+        } else {
+            // Warn user that there is no connection
+            Snackbar.make(getActivity().findViewById(R.id.settings_fragment), "Bluetooth is not connected.", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    public void onClickWrite() {
+        // Start the write process if we are connected
+        if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
+            sendData();
         } else {
             // Warn user that there is no connection
             Snackbar.make(getActivity().findViewById(R.id.settings_fragment), "Bluetooth is not connected.", Snackbar.LENGTH_SHORT).show();

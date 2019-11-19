@@ -135,7 +135,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
             if(pkt.PacketLength > 0) {
                 // Good packet!
                 mReadBuffer.delete(0,pkt.SOPposition+pkt.PacketLength);
-                if(pkt.PacketID == (char)0xA7) {
+                if(pkt.PacketID == PacketTools.DASHBOARD_DATA_RESULT) {
                     // This is our dashboard data response
                     mCurrentThrottle = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
                     mCurrentSpeed = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(4,8)));
@@ -192,7 +192,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     public Runnable askDataRunnable = new Runnable() {
         @Override
         public void run() {
-            StringBuffer myBuf = PacketTools.Pack((char) 0x27, new char[0]);
+            StringBuffer myBuf = PacketTools.Pack(PacketTools.REQUEST_DASHBOARD_DATA, new char[0]);
             if (((GlobalSettings) getActivity().getApplication()).isConnected()) {
                 mListener.Write(myBuf);
             }

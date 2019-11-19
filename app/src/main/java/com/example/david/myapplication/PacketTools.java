@@ -6,6 +6,28 @@ public class PacketTools {
     private static final char SOP1 = 0x9A;
     private static final char SOP2 = 0xCC;
 
+    // Packet IDs:
+    // Packet type defines, Host to Controller
+    public static final char GET_RAM_VARIABLE        =(0x01);
+    public static final char SET_RAM_VARIABLE        =(0x02);
+    public static final char GET_EEPROM_VARIABLE     =(0x03);
+    public static final char SET_EEPROM_VARIABLE     =(0x04);
+    public static final char ENABLE_FEATURE          =(0x05);
+    public static final char DISABLE_FEATURE         =(0x06);
+    public static final char RUN_ROUTINE             =(0x07);
+    public static final char HOST_STREAM_DATA        =(0x08);
+    public static final char HOST_ACK                =(0x11);
+    public static final char HOST_NACK               =(0x12);
+    public static final char REQUEST_DASHBOARD_DATA  =(0x27);
+    // Packet type defines, Controller to Host
+    public static final char GET_RAM_RESULT          =(0x81);
+    public static final char GET_EEPROM_RESULT       =(0x83);
+    public static final char ROUTINE_RESULT          =(0x87);
+    public static final char CONTROLLER_STREAM_DATA  =(0x88);
+    public static final char CONTROLLER_ACK          =(0x91);
+    public static final char CONTROLLER_NACK         =(0x92);
+    public static final char DASHBOARD_DATA_RESULT   =(0xA7);
+
 //    private CRC32 crc_generator = null;
 
     public static StringBuffer floatToString(float in_float) {
@@ -46,11 +68,27 @@ public class PacketTools {
         return (int)out_int;
     }
 
+    public static StringBuffer int32toString(int in_val) {
+        StringBuffer out_string = new StringBuffer(4);
+        out_string.append((char)((in_val & 0xFF000000) >> 24));
+        out_string.append((char)((in_val & 0x00FF0000) >> 16));
+        out_string.append((char)((in_val & 0x0000FF00) >> 8));
+        out_string.append((char)(in_val & 0x000000FF));
+        return out_string;
+    }
+
     public static int stringTo16bitInt(StringBuffer in_string) {
         int out_int;
         out_int = in_string.charAt(0) * (256);
         out_int += in_string.charAt(1);
         return out_int;
+    }
+
+    public static StringBuffer int16toString(int in_val) {
+        StringBuffer out_string = new StringBuffer(2);
+        out_string.append((char)((in_val & 0xFF00) >> 8));
+        out_string.append((char)(in_val & 0x00FF));
+        return out_string;
     }
 
     public static int stringTo8bitInt(StringBuffer in_string) {

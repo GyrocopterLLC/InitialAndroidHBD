@@ -162,11 +162,12 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
+        mHandler = new Handler(getMainLooper(), new MainCallback());
 
         if(((GlobalSettings)getApplication()).isConnected()){
             mSocket = ((GlobalSettings)getApplication()).getSocket();
             // Create new handler for messaging the BT device
-            mHandler = new Handler(getMainLooper(), new MainCallback());
+
             // Start the BT read-write thread
             btReadWriteThread = new BTReadWriteThread(mSocket, mHandler);
             new Thread(btReadWriteThread).start();
@@ -190,7 +191,6 @@ public class MainActivity extends AppCompatActivity
     private BluetoothUserFragment getActiveFragment() {
         return (BluetoothUserFragment) getSupportFragmentManager().findFragmentById(R.id.frameLayout);
     }
-
 
     public class MainCallback implements Handler.Callback {
         @Override
@@ -258,6 +258,14 @@ public class MainActivity extends AppCompatActivity
             ((SettingsFragment)getActiveFragment()).onClickRead();
         }
     }
+
+    public void onClickSettingsWrite(View view) {
+        // Should only be called when settings fragment is active
+        if(getActiveFragment() instanceof SettingsFragment) {
+            ((SettingsFragment)getActiveFragment()).onClickWrite();
+        }
+    }
+
 
     @Override
     protected void onDestroy() {

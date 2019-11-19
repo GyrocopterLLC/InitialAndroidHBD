@@ -140,7 +140,7 @@ public class BatteryFragment extends BluetoothUserFragment {
             // Start reading batteries. First, ask if the BMS is connected.
             mBMSstate = BMS_State.CHECK_CONNECTION;
             char[] packet_data = {0x06, 0x01};
-            StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+            StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
             mListener.Write(myBuf);
         } else {
             ((TextView)getActivity().findViewById(R.id.batteryBTstatusText)).setText("Not connected");
@@ -159,7 +159,7 @@ public class BatteryFragment extends BluetoothUserFragment {
             if (pkt.PacketLength > 0) {
                 // Good packet!
                 mReadBuffer.delete(0, pkt.SOPposition + pkt.PacketLength);
-                if (pkt.PacketID == (char) 0x81) {
+                if (pkt.PacketID == PacketTools.GET_RAM_RESULT) {
                     // Packet is get ram data response
                     if (mBMSstate == BMS_State.CHECK_CONNECTION) {
                         // Let's see if we need to even continue
@@ -172,7 +172,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                                 // Continue to next step
                                 mBMSstate = BMS_State.GET_NUM_BATTERIES;
                                 char[] packet_data = {0x06, 0x02};
-                                StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+                                StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                                 mListener.Write(myBuf);
                             }
                         } else {
@@ -189,7 +189,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                             mCurrentBattery = 0;
                             // TODO: Change following line if need more than 256 batteries.
                             char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
-                            StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+                            StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
                         }
                     } else if (mBMSstate == BMS_State.GET_BATTERY_VOLTAGES) {
@@ -199,7 +199,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                         if(mCurrentBattery < mNumBatteries) {
                             // TODO: Change following line if need more than 256 batteries.
                             char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
-                            StringBuffer myBuf = PacketTools.Pack((char) 0x01, packet_data);
+                            StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
                         } else {
                             mBMSstate = BMS_State.DONE;
