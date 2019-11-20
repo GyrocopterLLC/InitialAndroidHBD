@@ -37,6 +37,8 @@ import static com.example.david.myapplication.SettingsConstants.throttleFormats;
 import static com.example.david.myapplication.SettingsConstants.throttleIDs;
 import static com.example.david.myapplication.SettingsConstants.throttleNames;
 
+// TODO: Set timeout (for re-enabling tabs, etc) during Read or Write events
+
 public class SettingsFragment extends BluetoothUserFragment {
     private static final String FRAGMENT_KEY = "com.example.david.myapplication.SETTINGS";
     private static final int MODE_RAM = 0;
@@ -319,6 +321,20 @@ public class SettingsFragment extends BluetoothUserFragment {
         }
     };
 
+    private void enableTabs() {
+        TabLayout tabLayout = (TabLayout)  getActivity().findViewById(R.id.settings_category_tabs);
+        TabLayoutUtils.enableTabs( tabLayout, true );
+        tabLayout = getActivity().findViewById(R.id.settings_ram_or_eeprom_tabs);
+        TabLayoutUtils.enableTabs(tabLayout, true);
+    }
+
+    private void disableTabs() {
+        TabLayout tabLayout = (TabLayout)  getActivity().findViewById(R.id.settings_category_tabs);
+        TabLayoutUtils.enableTabs( tabLayout, false );
+        tabLayout = getActivity().findViewById(R.id.settings_ram_or_eeprom_tabs);
+        TabLayoutUtils.enableTabs(tabLayout, false);
+    }
+
     @Override
     public void ReceiveDataCallback(StringBuffer newData) {
         mReadBuffer.append(newData);
@@ -360,10 +376,16 @@ public class SettingsFragment extends BluetoothUserFragment {
                             myBuf = PacketTools.Pack(PacketTools.GET_EEPROM_VARIABLE, packet_data); // Get EEPROM
                         }
                         mListener.Write(myBuf);
+                    } else {
+                        // We are done. Re-enable the tabs
+                        enableTabs();
                     }
 
                 } else if(pkt.PacketID == PacketTools.CONTROLLER_ACK) {
                     // Ack packet. New data sent successfully.
+                    // Clear the "changed" status
+                    ((SettingsAdapter)mAdapter).setNewValue(mEditedValues[mVarNum],mVarNum,false);
+                    mSettingsValues[mVarNum] = mEditedValues[mVarNum];
                     // Find the next changed value
                     int i = mVarNum + 1;
                     mVarNum = -1;
@@ -394,14 +416,21 @@ public class SettingsFragment extends BluetoothUserFragment {
                         } else {
                             mListener.Write(PacketTools.Pack(PacketTools.SET_EEPROM_VARIABLE, packet_data.toString().toCharArray()));
                         }
+                    } else {
+                        // We are done. Re-enable the tabs
+                        enableTabs();
                     }
 
                 } else if (pkt.PacketID == PacketTools.CONTROLLER_NACK) {
                     // Nack packet. Something screwed up.
+                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Comms error.",Snackbar.LENGTH_SHORT).show();
+                    enableTabs();
 
                 } else {
                     // This is bad news. Anything besides the proper response
                     // is probably an error.
+                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Comms error.",Snackbar.LENGTH_SHORT).show();
+                    enableTabs();
                 }
             }
         }
@@ -472,6 +501,7 @@ public class SettingsFragment extends BluetoothUserFragment {
     public void onClickRead() {
         // Start the read process if we are connected
         if(((GlobalSettings)getActivity().getApplication()).isConnected()){
+            disableTabs();
             refreshData();
         } else {
             // Warn user that there is no connection
@@ -482,6 +512,7 @@ public class SettingsFragment extends BluetoothUserFragment {
     public void onClickWrite() {
         // Start the write process if we are connected
         if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
+            disableTabs();
             sendData();
         } else {
             // Warn user that there is no connection
