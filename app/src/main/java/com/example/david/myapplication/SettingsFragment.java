@@ -365,7 +365,7 @@ public class SettingsFragment extends BluetoothUserFragment {
                 } else if(pkt.PacketID == PacketTools.CONTROLLER_ACK) {
                     // Ack packet. New data sent successfully.
                     // Find the next changed value
-                    int i = mVarNum;
+                    int i = mVarNum + 1;
                     mVarNum = -1;
                     for(; (i < mSettingsNames.length) && (mVarNum == -1); i++) {
                         if(((SettingsAdapter)mAdapter).mChanged[i]) {

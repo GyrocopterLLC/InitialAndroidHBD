@@ -200,7 +200,9 @@ public class PacketTools {
         retPacket.SOPposition = raw_bytes.indexOf(SOP_string.toString());
         if(retPacket.SOPposition >= 0) {
             // SOP found! Next is packet type and data length.
-            if(bytes_len > retPacket.SOPposition + 4) {
+            // Ensure sufficient data length
+            // We need at least 4 more bytes after the 2 SOP bytes
+            if(bytes_len > retPacket.SOPposition + 6) {
                 packet_type = raw_bytes.charAt(retPacket.SOPposition + 2);
                 nPacket_type = raw_bytes.charAt(retPacket.SOPposition + 3);
                 if(packet_type != ((~nPacket_type)&0xFF)) {
@@ -232,6 +234,11 @@ public class PacketTools {
                     }
                 }
             }
+        } else {
+            // The 2 bytes of SOP were not found. But what if the first one came and we're waiting
+            // for the second? Check if just SOP1 is there and let the caller know.
+            SOP_string.deleteCharAt(1);
+            retPacket.SOPposition = raw_bytes.indexOf(SOP_string.toString());
         }
 
         return retPacket;
