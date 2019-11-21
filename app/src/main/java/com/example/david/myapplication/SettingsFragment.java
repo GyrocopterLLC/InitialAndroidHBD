@@ -265,7 +265,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             // Edit value popup
             AlertDialog.Builder popupValueChanger = new AlertDialog.Builder(getActivity());
             popupValueChanger.setTitle("New Value");
-            popupValueChanger.setMessage("Enter a new value");
+            popupValueChanger.setMessage(String.format("Enter a new value for %s",mSettingsNames[position]));
             mEditVarNum = position;
             final EditText input = new EditText(getActivity());
 
@@ -281,7 +281,7 @@ public class SettingsFragment extends BluetoothUserFragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // Set the new value
-                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("New value is %s",input.getText()), Snackbar.LENGTH_SHORT).show();
+//                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("New value is %s",input.getText()), Snackbar.LENGTH_SHORT).show();
                     mEditedValues[mEditVarNum] = Float.parseFloat(input.getText().toString());
                     ((SettingsAdapter)mAdapter).setNewValue(mEditedValues[mEditVarNum],mEditVarNum,true);
 
@@ -290,7 +290,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             popupValueChanger.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), "Canceled.", Snackbar.LENGTH_SHORT).show();
+//                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), "Canceled.", Snackbar.LENGTH_SHORT).show();
                 }
             });
             popupValueChanger.show();
@@ -306,7 +306,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             popupValueResetter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("%s reset.",mSettingsNames[mEditVarNum]),Snackbar.LENGTH_SHORT).show();
+//                    Snackbar.make(getActivity().findViewById(R.id.settings_fragment), String.format("%s reset.",mSettingsNames[mEditVarNum]),Snackbar.LENGTH_SHORT).show();
                     mEditedValues[mEditVarNum] = 0.0f;
                     ((SettingsAdapter)mAdapter).setNewValue(mSettingsValues[mEditVarNum],mEditVarNum,false);
                 }
@@ -314,7 +314,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             popupValueResetter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Canceled.",Snackbar.LENGTH_SHORT).show();
+//                            Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Canceled.",Snackbar.LENGTH_SHORT).show();
                         }
                     });
             popupValueResetter.show();
@@ -346,6 +346,7 @@ public class SettingsFragment extends BluetoothUserFragment {
         } else {
             if (pkt.PacketLength > 0) {
                 // Good packet!
+                stopTimeout();
                 mReadBuffer.delete(0, pkt.SOPposition + pkt.PacketLength);
                 if (pkt.PacketID == PacketTools.GET_RAM_RESULT || pkt.PacketID == PacketTools.GET_EEPROM_RESULT) {
                     // Packet is get ram or get EEPROM data response
@@ -376,13 +377,16 @@ public class SettingsFragment extends BluetoothUserFragment {
                             myBuf = PacketTools.Pack(PacketTools.GET_EEPROM_VARIABLE, packet_data); // Get EEPROM
                         }
                         mListener.Write(myBuf);
+                        startTimeout();
                     } else {
                         // We are done. Re-enable the tabs
+                        Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Variables refreshed.",Snackbar.LENGTH_SHORT).show();
                         enableTabs();
                     }
 
                 } else if(pkt.PacketID == PacketTools.CONTROLLER_ACK) {
                     // Ack packet. New data sent successfully.
+                    stopTimeout();
                     // Clear the "changed" status
                     ((SettingsAdapter)mAdapter).setNewValue(mEditedValues[mVarNum],mVarNum,false);
                     mSettingsValues[mVarNum] = mEditedValues[mVarNum];
@@ -416,19 +420,23 @@ public class SettingsFragment extends BluetoothUserFragment {
                         } else {
                             mListener.Write(PacketTools.Pack(PacketTools.SET_EEPROM_VARIABLE, packet_data.toString().toCharArray()));
                         }
+                        startTimeout();
                     } else {
                         // We are done. Re-enable the tabs
+                        Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Variables written.",Snackbar.LENGTH_SHORT).show();
                         enableTabs();
                     }
 
                 } else if (pkt.PacketID == PacketTools.CONTROLLER_NACK) {
                     // Nack packet. Something screwed up.
+                    stopTimeout();
                     Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Comms error.",Snackbar.LENGTH_SHORT).show();
                     enableTabs();
 
                 } else {
                     // This is bad news. Anything besides the proper response
                     // is probably an error.
+                    stopTimeout();
                     Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Comms error.",Snackbar.LENGTH_SHORT).show();
                     enableTabs();
                 }
@@ -447,7 +455,24 @@ public class SettingsFragment extends BluetoothUserFragment {
             myBuf = PacketTools.Pack(PacketTools.GET_EEPROM_VARIABLE, packet_data);
         }
         mListener.Write(myBuf);
+        startTimeout();
     }
+
+    private void startTimeout() {
+        mHandler.postDelayed(timerExpired, 250);
+    }
+
+    private void stopTimeout() {
+        mHandler.removeCallbacks(timerExpired);
+    }
+
+    public Runnable timerExpired = new Runnable() {
+        @Override
+        public void run() {
+            Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"Comms timeout.",Snackbar.LENGTH_SHORT).show();
+            enableTabs();
+        }
+    };
 
     private void sendData() {
         mVarNum = -1; // Invalid entry - for error checking below
@@ -480,6 +505,7 @@ public class SettingsFragment extends BluetoothUserFragment {
             } else {
                 mListener.Write(PacketTools.Pack(PacketTools.SET_EEPROM_VARIABLE, packet_data.toString().toCharArray()));
             }
+            startTimeout();
         } else {
             // Notify user that nothing is changed, so nothing will be sent
             Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"No changes.",Snackbar.LENGTH_SHORT).show();

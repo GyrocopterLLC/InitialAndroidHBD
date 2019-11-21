@@ -45,6 +45,21 @@ public class BatteryFragment extends BluetoothUserFragment {
     private StringBuffer mReadBuffer;
     private Handler mHandler;
 
+    public Runnable timerExpired = new Runnable() {
+        @Override
+        public void run() {
+            Snackbar.make(getActivity().findViewById(R.id.battery_fragment),"Comms timeout.",Snackbar.LENGTH_SHORT).show();
+        }
+    };
+
+    private void startTimeout() {
+        mHandler.postDelayed(timerExpired, 250);
+    }
+
+    private void stopTimeout() {
+        mHandler.removeCallbacks(timerExpired);
+    }
+
 
     // Required empty constructer
     public BatteryFragment() {}
@@ -131,17 +146,20 @@ public class BatteryFragment extends BluetoothUserFragment {
         recyclerView.setAdapter(mAdapter);
         recyclerView.invalidate();
 
+        // Pull handler from main activity
+        mHandler = mListener.getActivityHandler();
+
         if(((GlobalSettings)getActivity().getApplication()).isConnected()){
             ((TextView)getActivity().findViewById(R.id.batteryBTstatusText)).setText("Connected to: "+((GlobalSettings)getActivity().getApplication()).getDevice().getName());
             mReadBuffer = new StringBuffer(1024);
-            // Pull handler from main activity
-            mHandler = mListener.getActivityHandler();
+
 
             // Start reading batteries. First, ask if the BMS is connected.
             mBMSstate = BMS_State.CHECK_CONNECTION;
             char[] packet_data = {0x06, 0x01};
             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
             mListener.Write(myBuf);
+            startTimeout();
         } else {
             ((TextView)getActivity().findViewById(R.id.batteryBTstatusText)).setText("Not connected");
         }
@@ -158,9 +176,11 @@ public class BatteryFragment extends BluetoothUserFragment {
         } else {
             if (pkt.PacketLength > 0) {
                 // Good packet!
+                stopTimeout();
                 mReadBuffer.delete(0, pkt.SOPposition + pkt.PacketLength);
                 if (pkt.PacketID == PacketTools.GET_RAM_RESULT) {
                     // Packet is get ram data response
+
                     if (mBMSstate == BMS_State.CHECK_CONNECTION) {
                         // Let's see if we need to even continue
                         if (pkt.Data.length() == 1) {
@@ -174,6 +194,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                                 char[] packet_data = {0x06, 0x02};
                                 StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                                 mListener.Write(myBuf);
+                                startTimeout();
                             }
                         } else {
                             // Wrong data length.
@@ -191,6 +212,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                             char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
                             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
+                            startTimeout();
                         }
                     } else if (mBMSstate == BMS_State.GET_BATTERY_VOLTAGES) {
                         float new_volts = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(0,4)));
@@ -201,6 +223,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                             char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
                             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
+                            startTimeout();
                         } else {
                             mBMSstate = BMS_State.DONE;
                         }
@@ -212,6 +235,7 @@ public class BatteryFragment extends BluetoothUserFragment {
                 } else {
                     // This is bad news. Anything besides the proper response
                     // is probably an error.
+                    stopTimeout();
                 }
             }
         }
