@@ -509,6 +509,7 @@ public class SettingsFragment extends BluetoothUserFragment {
         } else {
             // Notify user that nothing is changed, so nothing will be sent
             Snackbar.make(getActivity().findViewById(R.id.settings_fragment),"No changes.",Snackbar.LENGTH_SHORT).show();
+            enableTabs();
         }
 
     }
