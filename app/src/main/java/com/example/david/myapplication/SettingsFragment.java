@@ -51,6 +51,7 @@ public class SettingsFragment extends BluetoothUserFragment {
     private int mRamOrEeprom = MODE_RAM;
     private int mVarNum;
     private int mEditVarNum;
+    private long mTimeout = 250;
 
     @Override
     public String GetFragmentID() {
@@ -459,7 +460,7 @@ public class SettingsFragment extends BluetoothUserFragment {
     }
 
     private void startTimeout() {
-        mHandler.postDelayed(timerExpired, 250);
+        mHandler.postDelayed(timerExpired, mTimeout);
     }
 
     private void stopTimeout() {
