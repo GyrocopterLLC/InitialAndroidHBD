@@ -35,6 +35,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     private float mCurrentFetTemp;
     private float mCurrentMotorTemp;
     private int mCurrentFaultCode;
+    private float mWheelSizeMM; // Diameter in mm
 
     @Override
     public String GetFragmentID() {
@@ -99,6 +100,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         mCurrentThrottle = 0;
         mCurrentBatteryAmps = 0;
         mCurrentPhaseAmps = 0;
+        mWheelSizeMM = 700.28f;
         if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
             ((TextView) getView().findViewById(R.id.text_btdevice_info)).setText("Connected to: " + ((GlobalSettings) getActivity().getApplication()).getDevice().getName());
             mReadBuffer = new StringBuffer(1024);
@@ -145,6 +147,9 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
                     mCurrentFetTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(20,24)));
                     mCurrentMotorTemp = PacketTools.stringToFloat(new StringBuffer(pkt.Data.substring(24,28)));
                     mCurrentFaultCode = PacketTools.stringToInt(new StringBuffer(pkt.Data.substring(28,32)));
+                    // Convert RPM to MPH --- 6.2137e-7 mm per mile, multiply by PI to get circumference from diameter, and by 60 to get hours from minutes
+//                    mCurrentSpeed = mWheelSizeMM * (float)Math.PI * 6.2137e-7f * 60.0f * mCurrentSpeed;
+                    mCurrentSpeed = 0.08202f * mCurrentSpeed; // Shortcut for 700.28mm diameter
                     mSpeedoView.setCurrentValue(mCurrentSpeed);
                     mThrottleView.setThrottlePosition((int)mCurrentThrottle);
                     mPhaseView.setCurrentValue(mCurrentPhaseAmps);
