@@ -151,7 +151,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
 //                    mCurrentSpeed = mWheelSizeMM * (float)Math.PI * 6.2137e-7f * 60.0f * mCurrentSpeed;
                     mCurrentSpeed = 0.08202f * mCurrentSpeed; // Shortcut for 700.28mm diameter
                     mSpeedoView.setCurrentValue(mCurrentSpeed);
-                    mThrottleView.setThrottlePosition((int)mCurrentThrottle);
+                    mThrottleView.setThrottlePosition((int)(mCurrentThrottle*100.0f)); // Throttle position comes in as a 0.0->1.0 valued float
                     mPhaseView.setCurrentValue(mCurrentPhaseAmps);
                     mBatteryView.setCurrentValue(mCurrentBatteryAmps);
                     ((TextView)getView().findViewById(R.id.batteryVoltageDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentBatteryVolts));
