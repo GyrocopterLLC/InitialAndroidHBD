@@ -187,7 +187,8 @@ public interface SettingsConstants {
             "MOTOR_HALL6",
             "MOTOR_POLEPAIRS",
             "MOTOR_GEAR_RATIO",
-            "MOTOR_WHEEL_SIZE"};
+            "MOTOR_WHEEL_SIZE",
+            "MOTOR_KV"};
     Integer[] motorFormats = {
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
@@ -196,6 +197,7 @@ public interface SettingsConstants {
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_16BIT,
+            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT};
     Integer[] motorIDs = {
@@ -207,5 +209,6 @@ public interface SettingsConstants {
             0x0506,
             0x0507,
             0x0508,
-            0x0509};
+            0x0509,
+            0x050A};
 }
