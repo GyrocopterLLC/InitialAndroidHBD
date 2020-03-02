@@ -18,6 +18,7 @@ public class BatteryFragment extends BluetoothUserFragment {
     private static final String FRAGMENT_KEY = "com.example.david.myapplication.BATTERY";
     private static final int DEFAULT_NUM_BATTERIES = 16;
     private static final float DEFAULT_BATT_VOLTAGE = 3.7f;
+    private long mTimeout = 250;
     enum BMS_State {
         CHECK_CONNECTION,
         GET_NUM_BATTERIES,
@@ -53,7 +54,7 @@ public class BatteryFragment extends BluetoothUserFragment {
     };
 
     private void startTimeout() {
-        mHandler.postDelayed(timerExpired, 250);
+        mHandler.postDelayed(timerExpired, mTimeout);
     }
 
     private void stopTimeout() {
