@@ -34,6 +34,12 @@
     <string name="motor_temp">Motor Temp</string>
     <string name="battery_voltage">Battery Voltage</string>
     <string name="dflt_variablevalue">0.000</string>
+    <string name="streamDataText">Stream Data</string>
+    <string name="streamDataTextOff">Idle</string>
+    <string name="streamDataTextOn">Stream</string>
+    <string name="focSwitchText">FOC/Trap</string>
+    <string name="focSwitchTextOff">FOC Mode</string>
+    <string name="focSwitchTextOn">Trap Mode</string>
     <string-array name="data_speed_vals">
         <item>50 Hz</item>
         <item>100 Hz</item>

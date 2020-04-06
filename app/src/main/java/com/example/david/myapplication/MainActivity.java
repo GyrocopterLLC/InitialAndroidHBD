@@ -237,20 +237,19 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
     }
 
-    public void onClickSimulate(View v) {
+    public void onClickStreamData(View v) {
         // Should only be called when gaugecluster fragment is active
         if(getActiveFragment() instanceof GaugeClusterFragment) {
-            ((GaugeClusterFragment)getActiveFragment()).onClickSimulate();
+            ((GaugeClusterFragment)getActiveFragment()).onClickStreamData();
         }
     }
 
-    public void onClickAskForData(View v) {
+    public void onClickFocTrapMode(View v) {
         // Should only be called when gaugecluster fragment is active
         if(getActiveFragment() instanceof GaugeClusterFragment) {
-            ((GaugeClusterFragment)getActiveFragment()).onClickAskForData();
+            ((GaugeClusterFragment)getActiveFragment()).onClickFocTrapMode();
         }
     }
-
 
     public void onClickSettingsRead(View view) {
         // Should only be called when settings fragment is active

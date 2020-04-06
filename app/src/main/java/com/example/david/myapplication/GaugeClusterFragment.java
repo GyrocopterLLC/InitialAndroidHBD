@@ -7,10 +7,13 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.util.Locale;
 
@@ -23,9 +26,11 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     private CountDownTimer mTimer; // For simulating the gauges
     private boolean mSpeedDir = false; // For changing direction during gauge simulation
     private boolean mAskingForData = false; // For toggling data on/off
+    private boolean mInTrapMode = false; // Switching between FOC and Trapezoidal control modes
     // Saved Views for easy updating
     private GaugeView mSpeedoView, mPhaseView, mBatteryView;
     private ThrottleView mThrottleView;
+    private ToggleButton mDataToggle, mFOCToggle;
     // Local variables holding the gauge values
     private float mCurrentSpeed;
     private float mCurrentThrottle;
@@ -96,6 +101,8 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         mThrottleView = getView().findViewById(R.id.throttleBar);
         mPhaseView = getView().findViewById(R.id.phaseCurrentBar);
         mBatteryView = getView().findViewById(R.id.batteryCurrentBar);
+        mDataToggle = getView().findViewById(R.id.swStreamData);
+        mFOCToggle = getView().findViewById(R.id.swFOC);
         mCurrentSpeed = 0;
         mCurrentThrottle = 0;
         mCurrentBatteryAmps = 0;
@@ -118,7 +125,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
             if(mAskingForData) {
                 mHandler.removeCallbacks(askDataRunnable);
                 mAskingForData = false;
-                ((Button) getView().findViewById(R.id.btn_askForData)).setText("ASK FOR DATA");
+                mDataToggle.setChecked(false);
             }
         }
         super.onPause();
@@ -162,38 +169,6 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         }
     }
 
-    public void onClickSimulate() {
-        // When the Simulate button is pressed, the Main activity should call this function
-        mTimer = new CountDownTimer(5000, 50) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if(mSpeedDir) {
-                    if (mCurrentSpeed < 30.0f) {
-                        mCurrentSpeed += 1.0f;
-                    } else {
-                        mSpeedDir = false;
-                    }
-                } else {
-                    if(mCurrentSpeed > 0.0f) {
-                        mCurrentSpeed -= 1.0f;
-                    } else {
-                        mSpeedDir = true;
-                    }
-                }
-                mSpeedoView.setCurrentValue(mCurrentSpeed);
-                mPhaseView.setCurrentValue(mPhaseView.getMaxValue()*(2.0f*mCurrentSpeed/30.0f - 1.0f));
-                mBatteryView.setCurrentValue(mBatteryView.getMaxValue()*(1.0f-2.0f*mCurrentSpeed/30.0f));
-                mThrottleView.setThrottlePosition((int)(mCurrentSpeed/30.0f*100));
-            }
-
-            @Override
-            public void onFinish() {
-                // Nothing nada zilch
-            }
-        };
-        mTimer.start();
-    }
-
     public Runnable askDataRunnable = new Runnable() {
         @Override
         public void run() {
@@ -206,25 +181,49 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         }
     };
 
-    public void onClickAskForData() {
-        // When the Ask for Data button is pressed, the Main activity should call this function
+    public void onClickStreamData() {
+        // When the Stream Data button is activated, the Main activity should call this function
         if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
             if(!mAskingForData) {
                 // Send a timed event
                 if(mHandler != null) {
                     mHandler.postDelayed(askDataRunnable, 50);
                     mAskingForData = true;
-                    ((Button) getView().findViewById(R.id.btn_askForData)).setText("STOP");
                 }
             } else {
                 // Stop the event
                 mHandler.removeCallbacks(askDataRunnable);
                 mAskingForData = false;
-                ((Button) getView().findViewById(R.id.btn_askForData)).setText("ASK FOR DATA");
             }
         } else {
             // Popup telling user that it can't be done
             Snackbar.make(getView().findViewById(R.id.gaugeLayout), "No connected device!", Snackbar.LENGTH_SHORT).show();
+            mDataToggle.setChecked(false);
+        }
+    }
+
+    public void onClickFocTrapMode() {
+        // When the toggle switch for FOC/Trap is pressed, the Main activity should call this function
+        if(((GlobalSettings)getActivity().getApplication()).isConnected()) {
+            if(!mInTrapMode) {
+                // Switch to Trapezoidal mode
+                char[] packet_data = {0x00, 0x02};
+                StringBuffer myBuf = PacketTools.Pack(PacketTools.ENABLE_FEATURE, packet_data);
+                mListener.Write(myBuf);
+                mInTrapMode = true;
+                mFOCToggle.setChecked(true);
+            } else {
+                // Switch back to FOC mode
+                char[] packet_data = {0x00, 0x02};
+                StringBuffer myBuf = PacketTools.Pack(PacketTools.DISABLE_FEATURE, packet_data);
+                mListener.Write(myBuf);
+                mInTrapMode = false;
+                mFOCToggle.setChecked(false);
+            }
+        } else {
+            // Popup telling user that it can't be done
+            Snackbar.make(getView().findViewById(R.id.gaugeLayout), "No connected device!", Snackbar.LENGTH_SHORT).show();
+            mFOCToggle.setChecked(mInTrapMode);
         }
     }
 
@@ -240,5 +239,7 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
         Snackbar.make(getView().findViewById(R.id.gaugeLayout), "Bluetooth Disconnected", Snackbar.LENGTH_SHORT).show();
         // Also update the textview for a more permanent user interaction
         ((TextView) getView().findViewById(R.id.text_btdevice_info)).setText("Bluetooth not connected.");
+        mDataToggle.setChecked(false);
+        mAskingForData = false;
     }
 }
