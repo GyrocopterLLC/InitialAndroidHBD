@@ -36,6 +36,10 @@ import static com.example.david.myapplication.SettingsConstants.motorNames;
 import static com.example.david.myapplication.SettingsConstants.throttleFormats;
 import static com.example.david.myapplication.SettingsConstants.throttleIDs;
 import static com.example.david.myapplication.SettingsConstants.throttleNames;
+import static com.example.david.myapplication.SettingsConstants.drvNames;
+import static com.example.david.myapplication.SettingsConstants.drvFormats;
+import static com.example.david.myapplication.SettingsConstants.drvIDs;
+
 
 // TODO: Set timeout (for re-enabling tabs, etc) during Read or Write events
 
@@ -131,7 +135,8 @@ public class SettingsFragment extends BluetoothUserFragment {
             tb_categories.addTab(tb_categories.newTab().setText("Main").setIcon(R.drawable.ic_format_list_numbered_black_24dp));
             tb_categories.addTab(tb_categories.newTab().setText("Throttle").setIcon(R.drawable.ic_flight_takeoff_black_24dp));
             tb_categories.addTab(tb_categories.newTab().setText("Limits").setIcon(R.drawable.ic_pan_tool_black_24dp));
-            tb_categories.addTab(tb_categories.newTab().setText("Motor").setIcon(R.drawable.ic_motor_icon));
+            tb_categories.addTab(tb_categories.newTab().setText("Motor").setIcon(R.drawable.ic_motor));
+            tb_categories.addTab(tb_categories.newTab().setText("DRV").setIcon(R.drawable.ic_memory_black_24dp));
         }
         if(tb_ramoreeprom.getTabCount() == 0) {
             tb_ramoreeprom.addTab(tb_ramoreeprom.newTab().setText("RAM"));
@@ -177,6 +182,12 @@ public class SettingsFragment extends BluetoothUserFragment {
                         mSettingsFormats = motorFormats;
                         mSettingsNames = motorNames;
                         mSettingsIDs = motorIDs;
+                        break;
+                    case 6:
+                        // DRV8353
+                        mSettingsFormats = drvFormats;
+                        mSettingsNames = drvNames;
+                        mSettingsIDs = drvIDs;
                         break;
                 }
                 mSettingsValues = new Float[mSettingsNames.length];
