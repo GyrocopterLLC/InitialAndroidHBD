@@ -211,4 +211,33 @@ public interface SettingsConstants {
             0x0508,
             0x0509,
             0x050A};
+
+    String[] drvNames = {
+            "DRV_GATE_STRENGTH",
+            "DRV_VDS_LIMIT",
+            "DRV_CSA_GAIN"};
+    Integer[] drvFormats = {
+            SettingsAdapter.SettingsTypes.TYPE_32BIT,
+            SettingsAdapter.SettingsTypes.TYPE_8BIT,
+            SettingsAdapter.SettingsTypes.TYPE_8BIT};
+    Integer[] drvIDs = {
+            0x0601,
+            0x0602,
+            0x0603};
+
+    String[] bmsNames = {
+            "BMS_IS_CONNECTED",
+            "BMS_NUMBATTS",
+            "BMS_BATVOLT_N",
+            "BMS_BATSTAT_N"};
+    Integer[] bmsFormats = {
+            SettingsAdapter.SettingsTypes.TYPE_8BIT,
+            SettingsAdapter.SettingsTypes.TYPE_16BIT,
+            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
+            SettingsAdapter.SettingsTypes.TYPE_32BIT};
+    Integer[] bmsIDs = {
+            0x1A01,
+            0x1A02,
+            0x1A03,
+            0x1A04};
 }

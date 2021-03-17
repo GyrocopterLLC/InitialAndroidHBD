@@ -13,6 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 public class BatteryFragment extends BluetoothUserFragment {
     private static final String FRAGMENT_KEY = "com.example.david.myapplication.BATTERY";
@@ -124,6 +127,8 @@ public class BatteryFragment extends BluetoothUserFragment {
             mBatteryStatuses[i] = 0;
         }
 
+
+        List mBMS_settings_names = Arrays.asList(SettingsConstants.bmsNames);
         recyclerView = getActivity().findViewById(R.id.batteryRecycler);
 
         // use a grid layout manager
@@ -157,7 +162,9 @@ public class BatteryFragment extends BluetoothUserFragment {
 
             // Start reading batteries. First, ask if the BMS is connected.
             mBMSstate = BMS_State.CHECK_CONNECTION;
-            char[] packet_data = {0x06, 0x01};
+            int var_index = mBMS_settings_names.indexOf("BMS_IS_CONNECTED");
+            int this_var_id = SettingsConstants.bmsIDs[var_index]; // BMS_IS_CONNECTED
+            char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF)};
             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
             mListener.Write(myBuf);
             startTimeout();
@@ -168,6 +175,9 @@ public class BatteryFragment extends BluetoothUserFragment {
 
     @Override
     public void ReceiveDataCallback(StringBuffer newData) {
+        int this_var_id;
+        int var_index;
+        List mBMS_settings_names = Arrays.asList(SettingsConstants.bmsNames);
         mReadBuffer.append(newData);
         // Check if a valid packet has arrived
         Packet pkt = PacketTools.Unpack(mReadBuffer);
@@ -192,7 +202,9 @@ public class BatteryFragment extends BluetoothUserFragment {
                             } else {
                                 // Continue to next step
                                 mBMSstate = BMS_State.GET_NUM_BATTERIES;
-                                char[] packet_data = {0x06, 0x02};
+                                var_index = mBMS_settings_names.indexOf("BMS_NUMBATTS");
+                                this_var_id = SettingsConstants.bmsIDs[var_index]; // BMS_NUMBATTS
+                                char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF)};
                                 StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                                 mListener.Write(myBuf);
                                 startTimeout();
@@ -209,8 +221,10 @@ public class BatteryFragment extends BluetoothUserFragment {
                             }
                             mBMSstate = BMS_State.GET_BATTERY_VOLTAGES;
                             mCurrentBattery = 0;
+                            var_index = mBMS_settings_names.indexOf("BMS_BATVOLT_N");
+                            this_var_id = SettingsConstants.bmsIDs[var_index]; // BMS_BATVOLT_N
                             // TODO: Change following line if need more than 256 batteries.
-                            char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
+                            char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF), 0, (char)mCurrentBattery};
                             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
                             startTimeout();
@@ -220,8 +234,10 @@ public class BatteryFragment extends BluetoothUserFragment {
                         ((BatteryAdapter)mAdapter).setBattery(new_volts, mCurrentBattery);
                         mCurrentBattery++;
                         if(mCurrentBattery < mNumBatteries) {
+                            var_index = mBMS_settings_names.indexOf("BMS_BATVOLT_N");
+                            this_var_id = SettingsConstants.bmsIDs[var_index]; // BMS_BATVOLT_N
                             // TODO: Change following line if need more than 256 batteries.
-                            char[] packet_data = {0x06, 0x03, 0, (char)mCurrentBattery};
+                            char[] packet_data = {(char)((this_var_id & 0xFF00)>>8), (char)(this_var_id & 0x00FF), 0, (char)mCurrentBattery};
                             StringBuffer myBuf = PacketTools.Pack(PacketTools.GET_RAM_VARIABLE, packet_data);
                             mListener.Write(myBuf);
                             startTimeout();
