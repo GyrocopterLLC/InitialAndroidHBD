@@ -21,4 +21,11 @@
         <attr name="gradient_start" format="integer"/>
     </declare-styleable>
 
+    <declare-styleable name="HUDView">
+        <attr name="min_battery" format="float" />
+        <attr name="max_battery" format="float" />
+        <attr name="max_power" format="float" />
+        <attr name="max_speed" format="float" />
+    </declare-styleable>
+
 </resources>
