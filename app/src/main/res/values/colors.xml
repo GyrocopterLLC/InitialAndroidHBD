@@ -9,4 +9,7 @@
     <color name="colorInactive">#D3D3D3</color>
     <color name="valueChanged">#33CC33</color>
     <color name="wiper">#FF2222</color>
+    <color name="battPwrLo">#E65100</color>
+    <color name="battPwrMid">#FBC02D</color>
+    <color name="battPwrHi">#4CAF50</color>
 </resources>

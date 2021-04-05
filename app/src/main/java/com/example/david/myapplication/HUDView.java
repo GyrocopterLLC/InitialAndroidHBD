@@ -20,6 +20,7 @@ public class HUDView extends View {
     private static final String TAG = GaugeView.class.getSimpleName();
     private static final int preferredWidth = 725;
     private static final int preferredHeight = 525;
+    private static final int NUM_LED_BARS = 12;
 
     // "Constants" for limiting the gauges
     private float MIN_BATTERY_VOLTS = 48.0f; // 16s battery pack at 3.0V
@@ -46,12 +47,13 @@ public class HUDView extends View {
         Paint ThrottleOn;
         Paint ThrottleOff;
         Paint ThrottleText;
+
+        Paint BattPwrLo;
+        Paint BattPwrMid;
+        Paint BattPwrHi;
+        Paint BattPwrText;
     }
     private Paints mpaints = new Paints();
-
-    private Paint mBarLowPaint; // LED bar style gauge, low value
-    private Paint mBarMedPaint; // LED bar style gauge, medium value
-    private Paint mBarHighPaint; // LED bar style gauge, high value
 
     // Paths, which are colored by Paints
     private class Paths {
@@ -80,6 +82,14 @@ public class HUDView extends View {
         PointF lr;
     };
     private ThrottlePoints mthrpts = new ThrottlePoints();
+
+    private class LEDBarPoints {
+        float barspacing;
+        float leftwall;
+        float rightwall;
+        PointF[] barpts;
+    }
+    private LEDBarPoints mbarpts = new LEDBarPoints();
 
     public HUDView(Context context) {
         super(context);
@@ -217,6 +227,43 @@ public class HUDView extends View {
                 null));
         mpaints.ThrottleText.setStyle(Paint.Style.FILL_AND_STROKE);
         mpaints.ThrottleText.setStrokeWidth(1.0f);
+
+        mpaints.BattPwrHi = new Paint();
+        mpaints.BattPwrHi.setColor(ResourcesCompat.getColor(getResources(),
+                R.color.battPwrHi,
+                null));
+        mpaints.BattPwrHi.setStyle(Paint.Style.STROKE);
+        mpaints.BattPwrHi.setAntiAlias(true);
+        mpaints.BattPwrHi.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
+                R.color.colorPrimaryDark,
+                null));
+
+        mpaints.BattPwrMid = new Paint();
+        mpaints.BattPwrMid.setColor(ResourcesCompat.getColor(getResources(),
+                R.color.battPwrMid,
+                null));
+        mpaints.BattPwrMid.setStyle(Paint.Style.STROKE);
+        mpaints.BattPwrMid.setAntiAlias(true);
+        mpaints.BattPwrMid.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
+                R.color.colorPrimaryDark,
+                null));
+
+        mpaints.BattPwrLo = new Paint();
+        mpaints.BattPwrLo.setColor(ResourcesCompat.getColor(getResources(),
+                R.color.battPwrLo,
+                null));
+        mpaints.BattPwrLo.setStyle(Paint.Style.STROKE);
+        mpaints.BattPwrLo.setAntiAlias(true);
+        mpaints.BattPwrLo.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
+                R.color.colorPrimaryDark,
+                null));
+
+        mpaints.BattPwrText = new Paint();
+        mpaints.BattPwrText.setColor(ResourcesCompat.getColor(getResources(),
+                R.color.colorPrimaryDark,
+                null));
+        mpaints.BattPwrText.setStyle(Paint.Style.FILL_AND_STROKE);
+        mpaints.BattPwrText.setStrokeWidth(1.0f);
     }
 
     @Override
@@ -257,7 +304,7 @@ public class HUDView extends View {
     private void calculatePoints(int width, int height) {
         // Determine start / stop points for all the drawings
 
-        // Speedometer: 60% of width of the view or 60% of height, whichever is smaller
+        // Speedometer drawing math
         int speedoWidth;
         if(width < height) {
             speedoWidth = 60*width/100;
@@ -281,6 +328,26 @@ public class HUDView extends View {
 //                * msppts.radius) + msppts.center.y;
 
 //        msppts.textcenter = (msppts.circle.top + msppts.textbottom) / 2;
+
+
+        mpaints.SpeedoBigText.setTextSize(speedoWidth/3);
+        mpaints.SpeedoSmallText.setTextSize(speedoWidth/5);
+        mpaints.SpeedoUnitsText.setTextSize(speedoWidth/8);
+        mpaints.SpeedoTicksText.setTextSize(speedoWidth/15);
+
+        float tempx, tempy;
+        for(int i = 0; i < msppts.ticks.length; i++) {
+            tempx = (float)(Math.cos((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
+                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
+                    + msppts.center.x;
+            tempy = (float)(Math.sin((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
+                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
+                    + msppts.center.y;
+            msppts.ticks[i] = new PointF(tempx, tempy);
+        }
+
+        // Throttle drawing math
+        mpaints.ThrottleText.setTextSize(speedoWidth / 15);
         mthrpts.ll.x = (float)(Math.cos(Math.PI*(135.0f+180.0f)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 + 16f;
@@ -305,23 +372,43 @@ public class HUDView extends View {
         mthrpts.ur.y = (float)(Math.sin(Math.PI*(135.0f+180.0f+270.0f)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mpaints.SpeedoBigText.setTextSize(speedoWidth/3);
-        mpaints.SpeedoSmallText.setTextSize(speedoWidth/5);
-        mpaints.SpeedoUnitsText.setTextSize(speedoWidth/8);
-        mpaints.SpeedoTicksText.setTextSize(speedoWidth/15);
 
-        float tempx, tempy;
-        for(int i = 0; i < msppts.ticks.length; i++) {
-            tempx = (float)(Math.cos((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
-                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
-                    + msppts.center.x;
-            tempy = (float)(Math.sin((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
-                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
-                    + msppts.center.y;
-            msppts.ticks[i] = new PointF(tempx, tempy);
+        // Battery and power LED bars drawing math
+        mpaints.BattPwrText.setTextSize(speedoWidth/5);
+        // Total Y height is 10 bars plus the word "Batt" or "Pwr", equal to the height
+        // of 80% of the speedometer
+        // Battery voltage and power readouts appear almost above the speedo
+
+        float speedoHeight =  mthrpts.ll.y - msppts.circle.top; // Throttle bar is at the bottom
+                                                                // of the speedometer
+        Rect bounds = new Rect();
+        mpaints.BattPwrText.getTextBounds("Batt",0,4,bounds);
+        mbarpts.barspacing = ((speedoHeight - bounds.height()-8f) / NUM_LED_BARS);
+        mpaints.BattPwrHi.setStrokeWidth(mbarpts.barspacing - 4f); // Get the blank space between, too
+        mpaints.BattPwrMid.setStrokeWidth(mbarpts.barspacing - 4f);
+        mpaints.BattPwrLo.setStrokeWidth(mbarpts.barspacing - 4f);
+
+        mbarpts.leftwall = 5*width / 100;
+        mbarpts.rightwall = width - mbarpts.leftwall;
+        mbarpts.barpts = new PointF[NUM_LED_BARS];
+        for(int i = 0; i < NUM_LED_BARS; i++) {
+            mbarpts.barpts[i] = new PointF();
+            mbarpts.barpts[i].y = mthrpts.ll.y - bounds.height() - mbarpts.barspacing/2 - 8f
+                    - i*mbarpts.barspacing;
+            mbarpts.barpts[i].x = (float) (Math.pow(msppts.radius+mpaints.SpeedoOn.getStrokeWidth(),2)
+                                - Math.pow(mbarpts.barpts[i].y - msppts.center.y,2));
+            if(mbarpts.barpts[i].x < 0f) {
+                if(i > 0)
+                    mbarpts.barpts[i].x = mbarpts.barpts[i-1].x;
+                else
+                    mbarpts.barpts[i].x = msppts.center.x - mthrpts.ll.x;
+            }
+            else
+            {
+                mbarpts.barpts[i].x = (float)Math.sqrt(mbarpts.barpts[i].x);
+            }
         }
 
-        mpaints.ThrottleText.setTextSize(speedoWidth / 15);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -450,6 +537,11 @@ public class HUDView extends View {
 
     private void drawBattery(Canvas canvas) {
 
+        for (int i = 0; i < NUM_LED_BARS; i++) {
+            canvas.drawLine(mbarpts.leftwall, mbarpts.barpts[i].y,
+                    (msppts.center.x - mbarpts.barpts[i].x),mbarpts.barpts[i].y,
+                    mpaints.BattPwrLo);
+        }
     }
 
     private void drawPower(Canvas canvas) {
