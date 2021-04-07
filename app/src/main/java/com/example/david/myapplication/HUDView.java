@@ -320,7 +320,7 @@ public class HUDView extends View {
         msppts.circle.bottom = msppts.circle.right
                 - msppts.circle.left + msppts.circle.top;
 
-        msppts.radius = (msppts.circle.left - msppts.circle.right) / 2;
+        msppts.radius = (msppts.circle.right - msppts.circle.left) / 2;
         msppts.center.x = (msppts.circle.left + msppts.circle.right) / 2;
         msppts.center.y = (msppts.circle.top + msppts.circle.bottom) / 2;
 
@@ -337,40 +337,40 @@ public class HUDView extends View {
 
         float tempx, tempy;
         for(int i = 0; i < msppts.ticks.length; i++) {
-            tempx = (float)(Math.cos((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
-                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
+            tempx = (float)(Math.cos((Math.PI/180.0f) * (135f  + (270f*(5f*i)/MAX_SPEED)))
+                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f + 6*speedoWidth/100)))
                     + msppts.center.x;
-            tempy = (float)(Math.sin((Math.PI/180.0f) * (135f + 180f + (270f*(5f*i)/MAX_SPEED)))
-                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f - 15*speedoWidth/100)))
+            tempy = (float)(Math.sin((Math.PI/180.0f) * (135f  + (270f*(5f*i)/MAX_SPEED)))
+                    * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f + 6*speedoWidth/100)))
                     + msppts.center.y;
             msppts.ticks[i] = new PointF(tempx, tempy);
         }
 
         // Throttle drawing math
         mpaints.ThrottleText.setTextSize(speedoWidth / 15);
-        mthrpts.ll.x = (float)(Math.cos(Math.PI*(135.0f+180.0f)/180.0f))
-                * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
-                + 16f;
-        mthrpts.ll.y = (float)(Math.sin(Math.PI*(135.0f+180.0f)/180.0f))
-                * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
-
-        mthrpts.ul.x = (float)(Math.cos(Math.PI*(135.0f+180.0f)/180.0f))
+        mthrpts.ll.x = (float)(Math.cos(Math.PI*(135.0f)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 + 16f;
-        mthrpts.ul.y = (float)(Math.sin(Math.PI*(135.0f+180.0f)/180.0f))
+        mthrpts.ll.y = (float)(Math.sin(Math.PI*(135.0f)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mthrpts.lr.x = (float)(Math.cos(Math.PI*(135.0f+180.0f+270.0f)/180.0f))
+        mthrpts.ul.x = (float)(Math.cos(Math.PI*(135.0f)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
-                - 16f;
-        mthrpts.lr.y = (float)(Math.sin(Math.PI*(135.0f+180.0f+270.0f)/180.0f))
+                + 16f;
+        mthrpts.ul.y = (float)(Math.sin(Math.PI*(135.0f)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mthrpts.ur.x = (float)(Math.cos(Math.PI*(135.0f+180.0f+270.0f)/180.0f))
+        mthrpts.lr.x = (float)(Math.cos(Math.PI*(135.0f+270.0f)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 - 16f;
-        mthrpts.ur.y = (float)(Math.sin(Math.PI*(135.0f+180.0f+270.0f)/180.0f))
+        mthrpts.lr.y = (float)(Math.sin(Math.PI*(135.0f+270.0f)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
+
+        mthrpts.ur.x = (float)(Math.cos(Math.PI*(135.0f+270.0f)/180.0f))
+                * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
+                - 16f;
+        mthrpts.ur.y = (float)(Math.sin(Math.PI*(135.0f+270.0f)/180.0f))
+                * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
 
         // Battery and power LED bars drawing math
@@ -446,7 +446,7 @@ public class HUDView extends View {
 
         // Add the wiper
         float speedoThick = mpaints.SpeedoOn.getStrokeWidth();
-        float speedoAngle = 135.0f+speedoSweepAngle + 180.0f;
+        float speedoAngle = 135.0f+speedoSweepAngle;
         // Draw from inside to outside of line thickness
         float wiperStartX = (float)(Math.cos(Math.PI*speedoAngle/180.0f)
                 * (msppts.radius - (speedoThick/2.0f + 5f))) + msppts.center.x;
