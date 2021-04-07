@@ -12,4 +12,7 @@
     <color name="battPwrLo">#E65100</color>
     <color name="battPwrMid">#FBC02D</color>
     <color name="battPwrHi">#4CAF50</color>
+    <color name="battPwrLoOff">#FFCCBC</color>
+    <color name="battPwrMidOff">#FFE0B2</color>
+    <color name="battPwrHiOff">#C8E6C9</color>
 </resources>

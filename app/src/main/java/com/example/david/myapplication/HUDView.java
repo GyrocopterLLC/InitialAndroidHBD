@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
+import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.res.ResourcesCompat;
@@ -30,8 +31,8 @@ public class HUDView extends View {
 
     // Current values
     private float mSpeed = 25.8f;
-    private float mPower = 0.0f;
-    private float mVolts = 0.0f;
+    private float mPower = 422.0f;
+    private float mVolts = 56.9f;
     private float mThrottle = 0.05f;
 
     // Paints, for drawing on a Canvas
@@ -48,9 +49,12 @@ public class HUDView extends View {
         Paint ThrottleOff;
         Paint ThrottleText;
 
-        Paint BattPwrLo;
-        Paint BattPwrMid;
-        Paint BattPwrHi;
+        Paint BattPwrLo_On;
+        Paint BattPwrLo_Off;
+        Paint BattPwrMid_On;
+        Paint BattPwrMid_Off;
+        Paint BattPwrHi_On;
+        Paint BattPwrHi_Off;
         Paint BattPwrText;
     }
     private Paints mpaints = new Paints();
@@ -113,81 +117,77 @@ public class HUDView extends View {
         initDrawingTools();
     }
 
+    private Paint createPaint(Paint.Style style, @ColorRes int color_id, float strokeWidth,
+                             float shadowRadius, @ColorRes int shadow_color_id) {
+        Paint newpaint = new Paint();
+        newpaint.setStyle(style);
+        newpaint.setColor(ResourcesCompat.getColor(
+                getResources(),
+                color_id,
+                null));
+        newpaint.setStrokeWidth(strokeWidth);
+        newpaint.setAntiAlias(true);
+        if(shadowRadius > 0.0f) {
+            newpaint.setShadowLayer(shadowRadius, 0f, 0f, ResourcesCompat.getColor(
+                    getResources(),
+                    shadow_color_id,
+                    null));
+        }
+
+        return newpaint;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void initDrawingTools() {
         // Create the paints for speedometer, power and battery gauges, throttle
-        mpaints.SpeedoOn = new Paint();
-        mpaints.SpeedoOn.setStyle(Paint.Style.STROKE);
-        mpaints.SpeedoOn.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoOn = createPaint(Paint.Style.STROKE,
                 R.color.colorPrimary,
-                null));
-        mpaints.SpeedoOn.setStrokeWidth(60f);
-        mpaints.SpeedoOn.setAntiAlias(true);
-        mpaints.SpeedoOn.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                60f,
+                5f,
+                R.color.colorPrimaryDark);
 
         mpaths.SpeedoOn = new Path();
         mpaths.SpeedoOff = new Path();
 
-        mpaints.SpeedoOff = new Paint();
-        mpaints.SpeedoOff.setStyle(Paint.Style.STROKE);
-        mpaints.SpeedoOff.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoOff = createPaint(Paint.Style.STROKE,
                 R.color.colorInactive,
-                null));
-        mpaints.SpeedoOff.setStrokeWidth(60f);
-        mpaints.SpeedoOff.setAntiAlias(true);
-        mpaints.SpeedoOff.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                60f,
+                5f,
+                R.color.colorPrimaryDark);
 
-        mpaints.SpeedoWiper = new Paint();
-        mpaints.SpeedoWiper.setStyle(Paint.Style.STROKE);
-        mpaints.SpeedoWiper.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoWiper = createPaint(Paint.Style.STROKE,
                 R.color.wiper,
-                null));
-        mpaints.SpeedoWiper.setStrokeWidth(10f);
-        mpaints.SpeedoWiper.setAntiAlias(true);
-        mpaints.SpeedoWiper.setShadowLayer(10f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                10f,
+                10f,
+                R.color.colorPrimaryDark);
 
         msppts.circle = new RectF();
         msppts.center = new PointF();
 
-        mpaints.SpeedoBigText = new Paint();
-        mpaints.SpeedoBigText.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoBigText = createPaint(Paint.Style.FILL_AND_STROKE,
                 R.color.colorPrimaryDark,
-                null));
+                1f,
+                0f,
+                0);
 
-        //Typeface cooper = ResourcesCompat.getFont(getContext(),R.font.cooper);
-        //Typeface.Builder cbuilder = new Typeface.Builder("D:\\Programming\\AndroidStudioProjects\\MyApplication\\app\\src\\main\\res\\font\\cooperblack.ttf");
-        //Typeface cooper = cbuilder.build();
-        //mpaints.SpeedoBigText.setTypeface(cooper);
-
-        mpaints.SpeedoBigText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.SpeedoBigText.setStrokeWidth(1.0f);
-
-        mpaints.SpeedoSmallText = new Paint();
-        mpaints.SpeedoSmallText.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoSmallText = createPaint(Paint.Style.FILL_AND_STROKE,
                 R.color.colorPrimaryDark,
-                null));
-        //mpaints.SpeedoSmallText.setTypeface(cooper);
-        mpaints.SpeedoSmallText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.SpeedoSmallText.setStrokeWidth(1.0f);
+                1f,
+                0f,
+                0);
 
-        mpaints.SpeedoUnitsText = new Paint();
-        mpaints.SpeedoUnitsText.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.SpeedoUnitsText = createPaint(Paint.Style.FILL_AND_STROKE,
                 R.color.colorPrimaryDark,
-                null));
-        //mpaints.SpeedoSmallText.setTypeface(cooper);
-        mpaints.SpeedoUnitsText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.SpeedoUnitsText.setStrokeWidth(1.0f);
+                1f,
+                0f,
+                0);
         mpaints.SpeedoUnitsText.setTextScaleX(0.5f);
 
-        mpaints.SpeedoTicksText = new Paint();
-        mpaints.SpeedoUnitsText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.SpeedoUnitsText.setStrokeWidth(1.0f);
+        mpaints.SpeedoTicksText = createPaint(Paint.Style.FILL_AND_STROKE,
+                R.color.colorPrimaryDark,
+                1f,
+                0f,
+                0);
 
         int numticks = (int)MAX_SPEED / 5;
         if((int)MAX_SPEED % 5 == 0) numticks = numticks+1;
@@ -201,69 +201,62 @@ public class HUDView extends View {
         mpaths.ThrottleOn = new Path();
         mpaths.ThrottleOff = new Path();
 
-        mpaints.ThrottleOn = new Paint();
-        mpaints.ThrottleOn.setStyle(Paint.Style.FILL);
-        mpaints.ThrottleOn.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.ThrottleOn = createPaint(Paint.Style.FILL,
                 R.color.colorPrimary,
-                null));
-        mpaints.ThrottleOn.setAntiAlias(true);
-        mpaints.ThrottleOn.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                1f,
+                5f,
+                R.color.colorPrimaryDark);
 
-        mpaints.ThrottleOff = new Paint();
-        mpaints.ThrottleOff.setStyle(Paint.Style.FILL);
-        mpaints.ThrottleOff.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.ThrottleOff = createPaint(Paint.Style.FILL,
                 R.color.colorInactive,
-                null));
-        mpaints.ThrottleOff.setAntiAlias(true);
-        mpaints.ThrottleOff.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                1f,
+                5f,
+                R.color.colorPrimaryDark);
 
-        mpaints.ThrottleText = new Paint();
-        mpaints.ThrottleText.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.ThrottleText = createPaint(Paint.Style.FILL_AND_STROKE,
                 R.color.colorPrimaryDark,
-                null));
-        mpaints.ThrottleText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.ThrottleText.setStrokeWidth(1.0f);
+                1f,
+                0f,
+                0);
 
-        mpaints.BattPwrHi = new Paint();
-        mpaints.BattPwrHi.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.BattPwrHi_On = createPaint(Paint.Style.STROKE,
                 R.color.battPwrHi,
-                null));
-        mpaints.BattPwrHi.setStyle(Paint.Style.STROKE);
-        mpaints.BattPwrHi.setAntiAlias(true);
-        mpaints.BattPwrHi.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                1.0f,
+                5.0f,
+                R.color.battPwrHi);
+        mpaints.BattPwrHi_Off = createPaint(Paint.Style.STROKE,
+                R.color.battPwrHiOff,
+                1.0f,
+                5.0f,
+                R.color.colorPrimaryDark);
 
-        mpaints.BattPwrMid = new Paint();
-        mpaints.BattPwrMid.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.BattPwrMid_On = createPaint(Paint.Style.STROKE,
                 R.color.battPwrMid,
-                null));
-        mpaints.BattPwrMid.setStyle(Paint.Style.STROKE);
-        mpaints.BattPwrMid.setAntiAlias(true);
-        mpaints.BattPwrMid.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                1.0f,
+                5.0f,
+                R.color.battPwrMid);
+        mpaints.BattPwrMid_Off = createPaint(Paint.Style.STROKE,
+                R.color.battPwrMidOff,
+                1.0f,
+                5.0f,
+                R.color.colorPrimaryDark);
 
-        mpaints.BattPwrLo = new Paint();
-        mpaints.BattPwrLo.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.BattPwrLo_On = createPaint(Paint.Style.STROKE,
                 R.color.battPwrLo,
-                null));
-        mpaints.BattPwrLo.setStyle(Paint.Style.STROKE);
-        mpaints.BattPwrLo.setAntiAlias(true);
-        mpaints.BattPwrLo.setShadowLayer(5f,0f,0f,ResourcesCompat.getColor(getResources(),
-                R.color.colorPrimaryDark,
-                null));
+                1.0f,
+                5.0f,
+                R.color.battPwrLo);
+        mpaints.BattPwrLo_Off = createPaint(Paint.Style.STROKE,
+                R.color.battPwrLoOff,
+                1.0f,
+                5.0f,
+                R.color.colorPrimaryDark);
 
-        mpaints.BattPwrText = new Paint();
-        mpaints.BattPwrText.setColor(ResourcesCompat.getColor(getResources(),
+        mpaints.BattPwrText = createPaint(Paint.Style.FILL_AND_STROKE,
                 R.color.colorPrimaryDark,
-                null));
-        mpaints.BattPwrText.setStyle(Paint.Style.FILL_AND_STROKE);
-        mpaints.BattPwrText.setStrokeWidth(1.0f);
+                1.0f,
+                0f,
+                0);
     }
 
     @Override
@@ -314,8 +307,8 @@ public class HUDView extends View {
         // Centered left-to-right
         msppts.circle.left = (width - speedoWidth) / 2;
         msppts.circle.right = width - msppts.circle.left;
-        // Bring it down about 1/6 from the top
-        msppts.circle.top = speedoWidth/6;
+        // Bring it down from the top enough to see the full speedometer arc
+        msppts.circle.top = mpaints.SpeedoOn.getStrokeWidth();
         // Force a square
         msppts.circle.bottom = msppts.circle.right
                 - msppts.circle.left + msppts.circle.top;
@@ -374,7 +367,7 @@ public class HUDView extends View {
 
 
         // Battery and power LED bars drawing math
-        mpaints.BattPwrText.setTextSize(speedoWidth/5);
+        mpaints.BattPwrText.setTextSize(speedoWidth/6);
         // Total Y height is 10 bars plus the word "Batt" or "Pwr", equal to the height
         // of 80% of the speedometer
         // Battery voltage and power readouts appear almost above the speedo
@@ -383,12 +376,19 @@ public class HUDView extends View {
                                                                 // of the speedometer
         Rect bounds = new Rect();
         mpaints.BattPwrText.getTextBounds("Batt",0,4,bounds);
-        mbarpts.barspacing = ((speedoHeight - bounds.height()-8f) / NUM_LED_BARS);
-        mpaints.BattPwrHi.setStrokeWidth(mbarpts.barspacing - 4f); // Get the blank space between, too
-        mpaints.BattPwrMid.setStrokeWidth(mbarpts.barspacing - 4f);
-        mpaints.BattPwrLo.setStrokeWidth(mbarpts.barspacing - 4f);
+        // Figure out how big the bars are. Using text on top and text on bottom (2*bounds.height),
+        // and spanning from the bottom to the top of the speedometer. A little spacing (8pxl)
+        // between the bottom text and bars, and another spacing (8 more pxl) between top text
+        // and bars.
+        mbarpts.barspacing = ((speedoHeight+(mpaints.SpeedoOn.getStrokeWidth()/2f) - 2*bounds.height() - 16f) / NUM_LED_BARS);
+        mpaints.BattPwrHi_On.setStrokeWidth(mbarpts.barspacing - 4f); // Get the blank space between, too
+        mpaints.BattPwrMid_On.setStrokeWidth(mbarpts.barspacing - 4f);
+        mpaints.BattPwrLo_On.setStrokeWidth(mbarpts.barspacing - 4f);
+        mpaints.BattPwrHi_Off.setStrokeWidth(mbarpts.barspacing/2f - 4f);
+        mpaints.BattPwrMid_Off.setStrokeWidth(mbarpts.barspacing/2f - 4f);
+        mpaints.BattPwrLo_Off.setStrokeWidth(mbarpts.barspacing/2f - 4f);
 
-        mbarpts.leftwall = 5*width / 100;
+        mbarpts.leftwall = 16f;
         mbarpts.rightwall = width - mbarpts.leftwall;
         mbarpts.barpts = new PointF[NUM_LED_BARS];
         for(int i = 0; i < NUM_LED_BARS; i++) {
@@ -537,15 +537,73 @@ public class HUDView extends View {
 
     private void drawBattery(Canvas canvas) {
 
+        canvas.drawText("Batt", mbarpts.leftwall, mthrpts.ll.y,mpaints.BattPwrText);
+        Rect bounds = new Rect();
+        String batt_val = String.format("%04.1f V", mVolts);
+        mpaints.BattPwrText.getTextBounds(batt_val, 0, batt_val.length(), bounds);
+        canvas.drawText(batt_val, mbarpts.leftwall,
+                msppts.circle.top - mpaints.SpeedoOn.getStrokeWidth()/2+bounds.height(),
+                mpaints.BattPwrText);
+
+        Paint tempPaint;
+
         for (int i = 0; i < NUM_LED_BARS; i++) {
+            if((mVolts - MIN_BATTERY_VOLTS) >= i*(MAX_BATTERY_VOLTS-MIN_BATTERY_VOLTS) / NUM_LED_BARS) {
+                if (i > 7 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrHi_On;
+                } else if (i > 3 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrMid_On;
+                } else {
+                    tempPaint = mpaints.BattPwrLo_On;
+                }
+            } else {
+                if (i > 7 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrHi_Off;
+                } else if (i > 3 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrMid_Off;
+                } else {
+                    tempPaint = mpaints.BattPwrLo_Off;
+                }
+            }
+
             canvas.drawLine(mbarpts.leftwall, mbarpts.barpts[i].y,
                     (msppts.center.x - mbarpts.barpts[i].x),mbarpts.barpts[i].y,
-                    mpaints.BattPwrLo);
+                    tempPaint);
         }
     }
 
     private void drawPower(Canvas canvas) {
+        Rect bounds = new Rect();
+        mpaints.BattPwrText.getTextBounds("Pwr",0,3,bounds);
+        canvas.drawText("Pwr", mbarpts.rightwall-bounds.width(), mthrpts.lr.y,mpaints.BattPwrText);
+        String pwr_val = String.format("%03d W",(int)mPower);
+        mpaints.BattPwrText.getTextBounds(pwr_val, 0, pwr_val.length(),bounds);
+        canvas.drawText(pwr_val, mbarpts.rightwall-bounds.width(),
+                msppts.circle.top-mpaints.SpeedoOn.getStrokeWidth()/2+bounds.height(),
+                mpaints.BattPwrText);
+        Paint tempPaint;
+        for (int i = 0; i < NUM_LED_BARS; i++) {
+            if(mPower >= i*MAX_POWER / NUM_LED_BARS) {
+                if (i > 7 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrHi_On;
+                } else if (i > 3 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrMid_On;
+                } else {
+                    tempPaint = mpaints.BattPwrLo_On;
+                }
+            } else {
+                if (i > 7 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrHi_Off;
+                } else if (i > 3 * NUM_LED_BARS / 10) {
+                    tempPaint = mpaints.BattPwrMid_Off;
+                } else {
+                    tempPaint = mpaints.BattPwrLo_Off;
+                }
+            }
+            canvas.drawLine(mbarpts.rightwall, mbarpts.barpts[i].y,
+                    (msppts.center.x + mbarpts.barpts[i].x), mbarpts.barpts[i].y,
+                    tempPaint);
 
+        }
     }
-
 }
