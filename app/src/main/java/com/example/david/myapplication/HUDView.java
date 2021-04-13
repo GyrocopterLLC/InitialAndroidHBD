@@ -28,12 +28,14 @@ public class HUDView extends View {
     private float MAX_BATTERY_VOLTS = 67.2f; // 16s battery pack at 4.2V
     private float MAX_POWER = 1000.0f;
     private float MAX_SPEED = 50.0f;
+    private float SPEEDO_START_ANGLE = 135.0f;
+    private float SPEEDO_FULL_ANGLE = 270.0f;
 
     // Current values
-    private float mSpeed = 25.8f;
-    private float mPower = 422.0f;
-    private float mVolts = 56.9f;
-    private float mThrottle = 0.05f;
+    private float mSpeed = 0.0f;
+    private float mPower = 0f;
+    private float mVolts = 0f;
+    private float mThrottle = 0.f;
 
     // Paints, for drawing on a Canvas
     private class Paints {
@@ -48,6 +50,7 @@ public class HUDView extends View {
         Paint ThrottleOn;
         Paint ThrottleOff;
         Paint ThrottleText;
+        Paint ThrottleFrame;
 
         Paint BattPwrLo_On;
         Paint BattPwrLo_Off;
@@ -63,6 +66,8 @@ public class HUDView extends View {
     private class Paths {
         Path SpeedoOn;
         Path SpeedoOff;
+        Path ThrottleLeftFrame;
+        Path ThrottleRightFrame;
         Path ThrottleOn;
         Path ThrottleOff;
     };
@@ -73,6 +78,7 @@ public class HUDView extends View {
         RectF circle;
         PointF center;
         float radius;
+        float speedTextOffset;
 //        float textbottom;
 //        float textcenter;
         PointF[] ticks;
@@ -115,6 +121,14 @@ public class HUDView extends View {
             a.recycle();
         }
         initDrawingTools();
+    }
+
+    public void setCurrentData(float speed, float throttle, float battery_volts, float total_power) {
+        mSpeed = speed;
+        mThrottle = throttle;
+        mVolts = battery_volts;
+        mPower = total_power;
+        this.invalidate();
     }
 
     private Paint createPaint(Paint.Style style, @ColorRes int color_id, float strokeWidth,
@@ -197,7 +211,8 @@ public class HUDView extends View {
         mthrpts.ur = new PointF();
         mthrpts.ll = new PointF();
         mthrpts.lr = new PointF();
-
+        mpaths.ThrottleLeftFrame = new Path();
+        mpaths.ThrottleRightFrame = new Path();
         mpaths.ThrottleOn = new Path();
         mpaths.ThrottleOff = new Path();
 
@@ -218,6 +233,12 @@ public class HUDView extends View {
                 1f,
                 0f,
                 0);
+
+        mpaints.ThrottleFrame = createPaint(Paint.Style.FILL,
+                R.color.throttleFrame,
+                1f,
+                5,
+                R.color.colorPrimaryDark);
 
         mpaints.BattPwrHi_On = createPaint(Paint.Style.STROKE,
                 R.color.battPwrHi,
@@ -270,18 +291,16 @@ public class HUDView extends View {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        if(widthMode == MeasureSpec.UNSPECIFIED) {
-            chosenWidth = preferredWidth;
-        } else {
-            // Either for MeasureSpec.EXACTLY or MeasureSpec.AT_MOST
-            // Width takes precedence over height
+        if(widthMode == MeasureSpec.EXACTLY || widthMode == MeasureSpec.AT_MOST) {
             chosenWidth = widthSize;
+        } else {
+            chosenWidth = preferredWidth;
         }
 
-        if(heightMode == MeasureSpec.UNSPECIFIED) {
-            chosenHeight = preferredHeight;
-        } else {
+        if(heightMode == MeasureSpec.EXACTLY|| heightMode == MeasureSpec.AT_MOST) {
             chosenHeight = heightSize;
+        } else {
+            chosenHeight = preferredHeight;
         }
 
         setMeasuredDimension(chosenWidth, chosenHeight);
@@ -299,11 +318,11 @@ public class HUDView extends View {
 
         // Speedometer drawing math
         int speedoWidth;
-        if(width < height) {
+//        if(width < height) {
             speedoWidth = 60*width/100;
-        } else {
-            speedoWidth = 60*height/100;
-        }
+//        } else {
+//            speedoWidth = 60*height/100;
+//        }
         // Centered left-to-right
         msppts.circle.left = (width - speedoWidth) / 2;
         msppts.circle.right = width - msppts.circle.left;
@@ -316,6 +335,7 @@ public class HUDView extends View {
         msppts.radius = (msppts.circle.right - msppts.circle.left) / 2;
         msppts.center.x = (msppts.circle.left + msppts.circle.right) / 2;
         msppts.center.y = (msppts.circle.top + msppts.circle.bottom) / 2;
+        msppts.speedTextOffset = speedoWidth/10;
 
 //        msppts.textbottom = (float)(Math.sin(Math.PI*(135.0f+180.0f)/180.0f)
 //                * msppts.radius) + msppts.center.y;
@@ -330,10 +350,10 @@ public class HUDView extends View {
 
         float tempx, tempy;
         for(int i = 0; i < msppts.ticks.length; i++) {
-            tempx = (float)(Math.cos((Math.PI/180.0f) * (135f  + (270f*(5f*i)/MAX_SPEED)))
+            tempx = (float)(Math.cos((Math.PI/180.0f) * (SPEEDO_START_ANGLE  + (SPEEDO_FULL_ANGLE*(5f*i)/MAX_SPEED)))
                     * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f + 6*speedoWidth/100)))
                     + msppts.center.x;
-            tempy = (float)(Math.sin((Math.PI/180.0f) * (135f  + (270f*(5f*i)/MAX_SPEED)))
+            tempy = (float)(Math.sin((Math.PI/180.0f) * (SPEEDO_START_ANGLE  + (SPEEDO_FULL_ANGLE*(5f*i)/MAX_SPEED)))
                     * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f + 6*speedoWidth/100)))
                     + msppts.center.y;
             msppts.ticks[i] = new PointF(tempx, tempy);
@@ -341,30 +361,41 @@ public class HUDView extends View {
 
         // Throttle drawing math
         mpaints.ThrottleText.setTextSize(speedoWidth / 15);
-        mthrpts.ll.x = (float)(Math.cos(Math.PI*(135.0f)/180.0f))
+        mthrpts.ll.x = (float)(Math.cos(Math.PI*(SPEEDO_START_ANGLE)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 + 16f;
-        mthrpts.ll.y = (float)(Math.sin(Math.PI*(135.0f)/180.0f))
+        mthrpts.ll.y = (float)(Math.sin(Math.PI*(SPEEDO_START_ANGLE)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mthrpts.ul.x = (float)(Math.cos(Math.PI*(135.0f)/180.0f))
+        mthrpts.ul.x = (float)(Math.cos(Math.PI*(SPEEDO_START_ANGLE)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 + 16f;
-        mthrpts.ul.y = (float)(Math.sin(Math.PI*(135.0f)/180.0f))
+        mthrpts.ul.y = (float)(Math.sin(Math.PI*(SPEEDO_START_ANGLE)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mthrpts.lr.x = (float)(Math.cos(Math.PI*(135.0f+270.0f)/180.0f))
+        mthrpts.lr.x = (float)(Math.cos(Math.PI*(SPEEDO_START_ANGLE+SPEEDO_FULL_ANGLE)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 - 16f;
-        mthrpts.lr.y = (float)(Math.sin(Math.PI*(135.0f+270.0f)/180.0f))
+        mthrpts.lr.y = (float)(Math.sin(Math.PI*(SPEEDO_START_ANGLE+SPEEDO_FULL_ANGLE)/180.0f))
                 * (msppts.radius + (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
-        mthrpts.ur.x = (float)(Math.cos(Math.PI*(135.0f+270.0f)/180.0f))
+        mthrpts.ur.x = (float)(Math.cos(Math.PI*(SPEEDO_START_ANGLE+SPEEDO_FULL_ANGLE)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.x
                 - 16f;
-        mthrpts.ur.y = (float)(Math.sin(Math.PI*(135.0f+270.0f)/180.0f))
+        mthrpts.ur.y = (float)(Math.sin(Math.PI*(SPEEDO_START_ANGLE+SPEEDO_FULL_ANGLE)/180.0f))
                 * (msppts.radius - (mpaints.SpeedoOn.getStrokeWidth()/2.0f)) + msppts.center.y;
 
+        // Predraw the frame triangles on left and right
+        mpaths.ThrottleLeftFrame.reset();
+        mpaths.ThrottleLeftFrame.moveTo(mthrpts.ll.x, mthrpts.ll.y);
+        mpaths.ThrottleLeftFrame.lineTo(mthrpts.ul.x, mthrpts.ul.y);
+        mpaths.ThrottleLeftFrame.lineTo(mthrpts.ul.x, mthrpts.ll.y);
+        mpaths.ThrottleLeftFrame.close();
+        mpaths.ThrottleRightFrame.reset();
+        mpaths.ThrottleRightFrame.moveTo(mthrpts.lr.x, mthrpts.lr.y);
+        mpaths.ThrottleRightFrame.lineTo(mthrpts.ur.x, mthrpts.ur.y);
+        mpaths.ThrottleRightFrame.lineTo(mthrpts.ur.x, mthrpts.lr.y);
+        mpaths.ThrottleRightFrame.close();
 
         // Battery and power LED bars drawing math
         mpaints.BattPwrText.setTextSize(speedoWidth/6);
@@ -422,6 +453,8 @@ public class HUDView extends View {
     }
 
     private void drawSpeedo(Canvas canvas) {
+        if(mSpeed > MAX_SPEED) mSpeed = MAX_SPEED;
+        if(mSpeed < 0f) mSpeed = 0f;
         float speedoSweepAngle = (360.0f-90.0f)*mSpeed/MAX_SPEED;
 
         // Draw the background color
@@ -430,23 +463,23 @@ public class HUDView extends View {
                 null));
 
         // Draw the speedometer arc
-        mpaths.SpeedoOn.reset();
+        mpaths.SpeedoOn.rewind();
         mpaths.SpeedoOn.addArc(msppts.circle,
-                135.0f,// Start angle = start of speed (clockwise drawing)
+                SPEEDO_START_ANGLE,// Start angle = start of speed (clockwise drawing)
                 speedoSweepAngle// Sweep angle
         );
 
-        mpaths.SpeedoOff.reset();
+        mpaths.SpeedoOff.rewind();
         mpaths.SpeedoOff.addArc(msppts.circle,
-                135.0f+speedoSweepAngle,
-                270.0f-speedoSweepAngle);
+                SPEEDO_START_ANGLE+speedoSweepAngle,
+                SPEEDO_FULL_ANGLE-speedoSweepAngle);
 
         canvas.drawPath(mpaths.SpeedoOn,mpaints.SpeedoOn);
         canvas.drawPath(mpaths.SpeedoOff,mpaints.SpeedoOff);
 
         // Add the wiper
         float speedoThick = mpaints.SpeedoOn.getStrokeWidth();
-        float speedoAngle = 135.0f+speedoSweepAngle;
+        float speedoAngle = SPEEDO_START_ANGLE+speedoSweepAngle;
         // Draw from inside to outside of line thickness
         float wiperStartX = (float)(Math.cos(Math.PI*speedoAngle/180.0f)
                 * (msppts.radius - (speedoThick/2.0f + 5f))) + msppts.center.x;
@@ -471,55 +504,61 @@ public class HUDView extends View {
                     mpaints.SpeedoTicksText);
         }
 
-
-
         // Print the speed in the middle
         String big_speed = String.format("%d.",(int)mSpeed);
-        String small_speed = String.format("%d",(int)(0.5f+10*(mSpeed - (int)mSpeed)));
+        String small_speed = String.format("%d",(int)(10f*(mSpeed - (int)mSpeed)));
         Rect bigbounds = new Rect();
         Rect smallbounds = new Rect();
         mpaints.SpeedoBigText.getTextBounds(big_speed, 0, big_speed.length(), bigbounds);
 
         // Speed is printed in the middle of the speedometer circle, but shifted slightly left
         // from dead center.
-        canvas.drawText(big_speed, msppts.center.x-(bigbounds.width()*0.75f),
+        canvas.drawText(big_speed, (msppts.center.x + msppts.speedTextOffset)-(bigbounds.width()),
                 msppts.center.y + (bigbounds.height()/2),
                 mpaints.SpeedoBigText);
-        mpaints.SpeedoSmallText.getTextBounds(small_speed, 0, small_speed.length(), smallbounds);
 
-        canvas.drawText(small_speed, msppts.center.x + 16 + (bigbounds.width()*0.25f),
-                msppts.center.y + (bigbounds.height()/2) - smallbounds.height(),
+        mpaints.SpeedoUnitsText.getTextBounds("MPH", 0, 3, smallbounds);
+        canvas.drawText(small_speed, msppts.center.x  + msppts.speedTextOffset,
+                msppts.center.y + (bigbounds.height()/2) - smallbounds.height() - 8,
                 mpaints.SpeedoSmallText);
-        canvas.drawText("MPH", msppts.center.x + 16 + (bigbounds.width()*0.25f),
+        canvas.drawText("MPH", msppts.center.x + 24 + msppts.speedTextOffset,
                 msppts.center.y + (bigbounds.height()/2),
                 mpaints.SpeedoUnitsText);
     }
 
     private void drawThrottle(Canvas canvas) {
-        // Draw trapezoid shapes at bottom of speedometer circle
+        if(mThrottle > 1.0f) mThrottle = 1.0f;
+        if(mThrottle < 0.0f) mThrottle = 0.0f;
+
 
         // Determine where to stop the "on" portion of the throttle bar
         float on_end_x = (mthrpts.ur.x - mthrpts.ul.x) // width of bar
             * mThrottle // scaled to throttle
             + mthrpts.ul.x; // Offset from the left
 
-        mpaths.ThrottleOn.reset();
+        mpaths.ThrottleOn.rewind();
         mpaths.ThrottleOn.moveTo(mthrpts.ul.x, mthrpts.ul.y);
-        mpaths.ThrottleOn.lineTo(mthrpts.ll.x, mthrpts.ll.y);
+        mpaths.ThrottleOn.lineTo(mthrpts.ul.x, mthrpts.ll.y);
         mpaths.ThrottleOn.lineTo(on_end_x, mthrpts.ll.y); // stop position
         mpaths.ThrottleOn.lineTo(on_end_x, mthrpts.ul.y);
         mpaths.ThrottleOn.close();
         canvas.drawPath(mpaths.ThrottleOn, mpaints.ThrottleOn);
 
-        mpaths.ThrottleOff.reset();
+        mpaths.ThrottleOff.rewind();
         mpaths.ThrottleOff.moveTo(mthrpts.ur.x, mthrpts.ur.y);
-        mpaths.ThrottleOff.lineTo(mthrpts.lr.x, mthrpts.lr.y);
+        mpaths.ThrottleOff.lineTo(mthrpts.ur.x, mthrpts.lr.y);
         mpaths.ThrottleOff.lineTo(on_end_x, mthrpts.lr.y); // stop position
         mpaths.ThrottleOff.lineTo(on_end_x, mthrpts.ur.y);
         mpaths.ThrottleOff.close();
         canvas.drawPath(mpaths.ThrottleOff, mpaints.ThrottleOff);
 
+        // Draw triangle bits on sides of throttle bar at bottom of speedometer circle
+        // Paths are precomputed in calculatePoints function
+        canvas.drawPath(mpaths.ThrottleLeftFrame, mpaints.ThrottleFrame);
+        canvas.drawPath(mpaths.ThrottleRightFrame, mpaints.ThrottleFrame);
+
         // Draw wiper
+
         canvas.drawLine(on_end_x,mthrpts.ul.y - 4f,
                 on_end_x,mthrpts.ll.y + 4f,
                 mpaints.SpeedoWiper);
@@ -536,6 +575,8 @@ public class HUDView extends View {
     }
 
     private void drawBattery(Canvas canvas) {
+        if(mVolts < 0.0f) mVolts = 0.0f;
+        if(mVolts > MAX_BATTERY_VOLTS) mVolts = MAX_BATTERY_VOLTS;
 
         canvas.drawText("Batt", mbarpts.leftwall, mthrpts.ll.y,mpaints.BattPwrText);
         Rect bounds = new Rect();
@@ -573,6 +614,8 @@ public class HUDView extends View {
     }
 
     private void drawPower(Canvas canvas) {
+        if(mPower < 0.0f) mPower = 0.0f;
+        if(mPower > MAX_POWER) mPower = MAX_POWER;
         Rect bounds = new Rect();
         mpaints.BattPwrText.getTextBounds("Pwr",0,3,bounds);
         canvas.drawText("Pwr", mbarpts.rightwall-bounds.width(), mthrpts.lr.y,mpaints.BattPwrText);

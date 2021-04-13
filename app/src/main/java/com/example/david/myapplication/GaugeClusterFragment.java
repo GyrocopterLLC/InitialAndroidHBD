@@ -23,13 +23,15 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     private StringBuffer mReadBuffer; // For saving incoming Bluetooth data
     public BluetoothUserFragmentInteractionListener mListener; // To be attached to the calling context
     private Handler mHandler; // Passed down from activity
-    private CountDownTimer mTimer; // For simulating the gauges
-    private boolean mSpeedDir = false; // For changing direction during gauge simulation
+    private boolean mSimDir = false; // For changing direction during gauge simulation
     private boolean mAskingForData = false; // For toggling data on/off
+    private boolean mSimulating = false;
     private boolean mInTrapMode = false; // Switching between FOC and Trapezoidal control modes
     // Saved Views for easy updating
-    private GaugeView mSpeedoView, mPhaseView, mBatteryView;
-    private ThrottleView mThrottleView;
+//    private GaugeView mSpeedoView, mPhaseView, mBatteryView;
+    private HUDView mSpeedoView;
+    private GaugeView mPhaseView, mBatteryView;
+//    private ThrottleView mThrottleView;
     private ToggleButton mDataToggle, mFOCToggle;
     // Local variables holding the gauge values
     private float mCurrentSpeed;
@@ -84,7 +86,8 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View v = inflater.inflate(R.layout.fragment_gaugecluster, container, false);
+//        View v = inflater.inflate(R.layout.fragment_gaugecluster, container, false);
+        View v = inflater.inflate(R.layout.fragment_hudcluster, container, false);
         return v;
     }
 
@@ -97,8 +100,9 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mSpeedoView = getView().findViewById(R.id.speedometer);
-        mThrottleView = getView().findViewById(R.id.throttleBar);
+//        mSpeedoView = getView().findViewById(R.id.speedometer);
+        mSpeedoView = getView().findViewById(R.id.HUDView);
+//        mThrottleView = getView().findViewById(R.id.throttleBar);
         mPhaseView = getView().findViewById(R.id.phaseCurrentBar);
         mBatteryView = getView().findViewById(R.id.batteryCurrentBar);
         mDataToggle = getView().findViewById(R.id.swStreamData);
@@ -157,11 +161,13 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
                     // Convert RPM to MPH --- 6.2137e-7 mm per mile, multiply by PI to get circumference from diameter, and by 60 to get hours from minutes
 //                    mCurrentSpeed = mWheelSizeMM * (float)Math.PI * 6.2137e-7f * 60.0f * mCurrentSpeed;
                     mCurrentSpeed = 0.08202f * mCurrentSpeed; // Shortcut for 700.28mm diameter
-                    mSpeedoView.setCurrentValue(mCurrentSpeed);
-                    mThrottleView.setThrottlePosition((int)(mCurrentThrottle*100.0f)); // Throttle position comes in as a 0.0->1.0 valued float
+//                    mSpeedoView.setCurrentValue(mCurrentSpeed);
+//                    mThrottleView.setThrottlePosition((int)(mCurrentThrottle*100.0f)); // Throttle position comes in as a 0.0->1.0 valued float
+                    mSpeedoView.setCurrentData(mCurrentSpeed,mCurrentThrottle,mCurrentBatteryVolts,
+                            mCurrentBatteryVolts * mCurrentBatteryAmps);
                     mPhaseView.setCurrentValue(mCurrentPhaseAmps);
                     mBatteryView.setCurrentValue(mCurrentBatteryAmps);
-                    ((TextView)getView().findViewById(R.id.batteryVoltageDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentBatteryVolts));
+//                    ((TextView)getView().findViewById(R.id.batteryVoltageDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentBatteryVolts));
                     ((TextView)getView().findViewById(R.id.fetTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentFetTemp));
                     ((TextView)getView().findViewById(R.id.motorTempDisplay)).setText(String.format(Locale.US,"%02.1f",mCurrentMotorTemp));
                 }
@@ -226,6 +232,70 @@ public class GaugeClusterFragment extends BluetoothUserFragment {
             mFOCToggle.setChecked(mInTrapMode);
         }
     }
+
+    public void onClickSimulate() {
+        // Flub some data to show movement on the HUD
+        mCurrentSpeed = 0f;
+        mCurrentThrottle = 0f;
+        mCurrentPhaseAmps = -100f;
+        mCurrentBatteryAmps = -50f;
+        mCurrentBatteryVolts = 48.0f;
+        mSpeedoView.setCurrentData(mCurrentSpeed,mCurrentThrottle,mCurrentBatteryVolts,
+                mCurrentBatteryVolts * mCurrentBatteryAmps);
+        mPhaseView.setCurrentValue(mCurrentPhaseAmps);
+        mBatteryView.setCurrentValue(mCurrentBatteryAmps);
+        mSimDir = false;
+
+        // Start a timer which will ramp these values up and down
+        if(mHandler == null) mHandler = mListener.getActivityHandler();
+        if(!mSimulating) {
+            mHandler.postDelayed(simDataChange, 100);
+            mSimulating = true;
+        } else {
+            mHandler.removeCallbacks(simDataChange);
+            mSimulating = false;
+        }
+
+    }
+
+    public Runnable simDataChange = new Runnable() {
+        float num_ticks_in_cycle = 3 * 10; // 3 seconds at 100ms per frame
+        float speedinc = 50f /  num_ticks_in_cycle;
+        float thrtinc = 1f / num_ticks_in_cycle;
+        float phaseampinc = 200f / num_ticks_in_cycle;
+        float battampinc = 100f / num_ticks_in_cycle;
+        float battvoltinc = (67.2f - 48.0f) / num_ticks_in_cycle;
+
+        @Override
+        public void run() {
+            if(!mSimDir) {
+                mCurrentSpeed += speedinc;
+                mCurrentThrottle += thrtinc;
+                mCurrentPhaseAmps += phaseampinc;
+                mCurrentBatteryAmps += battampinc;
+                mCurrentBatteryVolts += battvoltinc;
+                if(mCurrentThrottle >= 1.0f) {
+                    mSimDir = true;
+                }
+            } else {
+                mCurrentSpeed -= speedinc;
+                mCurrentThrottle -= thrtinc;
+                mCurrentPhaseAmps -= phaseampinc;
+                mCurrentBatteryAmps -= battampinc;
+                mCurrentBatteryVolts -= battvoltinc;
+                if(mCurrentThrottle <= 0.0f) {
+                    mSimDir = false;
+                }
+            }
+            mSpeedoView.setCurrentData(mCurrentSpeed,mCurrentThrottle,mCurrentBatteryVolts,
+                    mCurrentBatteryVolts * mCurrentBatteryAmps);
+            mPhaseView.setCurrentValue(mCurrentPhaseAmps);
+            mBatteryView.setCurrentValue(mCurrentBatteryAmps);
+
+            mHandler.postDelayed(this, 100);
+
+        }
+    };
 
     @Override
     public void ErrorCallback() {

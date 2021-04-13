@@ -40,6 +40,8 @@
     <string name="focSwitchText">FOC/Trap</string>
     <string name="focSwitchTextOff">FOC Mode</string>
     <string name="focSwitchTextOn">Trap Mode</string>
+    <string name="simulateTextOff">NoSim</string>
+    <string name="simulateTextOn">Simulate</string>
     <string-array name="data_speed_vals">
         <item>50 Hz</item>
         <item>100 Hz</item>

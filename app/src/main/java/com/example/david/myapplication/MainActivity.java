@@ -265,6 +265,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void onClickSimulate(View view) {
+        // Called to simulate the HUD and show some movement
+        if(getActiveFragment() instanceof GaugeClusterFragment) {
+            ((GaugeClusterFragment)getActiveFragment()).onClickSimulate();
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
