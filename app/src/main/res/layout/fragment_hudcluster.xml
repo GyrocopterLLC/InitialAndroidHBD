@@ -315,22 +315,10 @@
             android:textOff="@string/streamDataTextOff"
             android:textOn="@string/streamDataTextOn"
             android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
-        <ToggleButton
-            android:id="@+id/swSimulate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:onClick="onClickSimulate"
-            android:text="@string/simulateTextOn"
-            android:textOff="@string/simulateTextOff"
-            android:textOn="@string/simulateTextOn"
-            android:textSize="24sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/swStreamData"
-            app:layout_constraintTop_toBottomOf="@+id/textView3" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

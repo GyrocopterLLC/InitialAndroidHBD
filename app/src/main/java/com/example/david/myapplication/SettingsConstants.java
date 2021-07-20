@@ -3,12 +3,14 @@ package com.example.david.myapplication;
 public interface SettingsConstants {
 
     String[] adcNames = {
-            "ADC_INV_TIA_GAIN",
+            "ADC_RSHUNT",
             "ADC_VBUS_RATIO",
+            "ADC_VPHASE_RATIO",
             "ADC_THERM_FIXED_R",
             "ADC_THERM_R25",
             "ADC_THERM_B"};
     Integer[] adcFormats = {
+            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
@@ -19,7 +21,8 @@ public interface SettingsConstants {
             0x0002,
             0x0003,
             0x0004,
-            0x0005};
+            0x0005,
+            0x0006};
 
     String[] focNames = {
             "FOC_KP",
@@ -44,7 +47,6 @@ public interface SettingsConstants {
             0x0106};
 
     String[] mainNames = {
-            "MAIN_RAMP_SPEED",
             "MAIN_COUNTS_TO_FOC",
             "MAIN_SPEED_TO_FOC",
             "MAIN_SWITCH_EPS",
@@ -61,7 +63,6 @@ public interface SettingsConstants {
             "MAIN_USB_CHOICE_9",
             "MAIN_USB_CHOICE_10"};
     Integer[] mainFormats = {
-            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_32BIT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
@@ -92,30 +93,17 @@ public interface SettingsConstants {
             0x020C,
             0x020D,
             0x020E,
-            0x020F,
-            0x0210};
+            0x020F};
 
     String[] throttleNames = {
-            "THRT_TYPE1",
-            "THRT_MIN1",
-            "THRT_MAX1",
-            "THRT_HYST1",
-            "THRT_FILT1",
-            "THRT_RISE1",
-            "THRT_TYPE2",
-            "THRT_MIN2",
-            "THRT_MAX2",
-            "THRT_HYST2",
-            "THRT_FILT2",
-            "THRT_RISE2"};
+            "THRT_MIN",
+            "THRT_MAX",
+            "THRT_HYST",
+            "THRT_FILT",
+            "THRT_RISE",
+            "THRT_RATIO"};
     Integer[] throttleFormats = {
-            SettingsAdapter.SettingsTypes.TYPE_16BIT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
-            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
-            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
-            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
-            SettingsAdapter.SettingsTypes.TYPE_FLOAT,
-            SettingsAdapter.SettingsTypes.TYPE_16BIT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
             SettingsAdapter.SettingsTypes.TYPE_FLOAT,
@@ -127,13 +115,7 @@ public interface SettingsConstants {
             0x0303,
             0x0304,
             0x0305,
-            0x0306,
-            0x0307,
-            0x0308,
-            0x0309,
-            0x030A,
-            0x030B,
-            0x030C};
+            0x0306};
 
     String[] limitNames = {
             "LMT_VOLT_FAULT_MIN",
